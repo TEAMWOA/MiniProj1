@@ -1,120 +1,180 @@
 import sqlite3
 import getpass
+import os
+from datetime import datetime
 
 
-def db_exit():
-    # Commits to database and closes connection before quitting
+def validate_date(date):
+    # Checks whether the date is valid according to the format YYYY-MM-DD
+    # Returns True if valid, False otherwise
+    try:
+        date = datetime.strptime(date, '%Y-%m-%d')
+        if date > datetime.now():
+            return True
+        else:
+            return False
+    except:
+        return False
 
-    connection.commit()
-    connection.close()
+
+def clear_screen():
+    # Function to clear the screen - less clutter
+    os.system("clear")
+
+
+def db_exit(db_connection):
+    # Commits to database, closes connection and clears screen prior to quitting
+    db_connection.commit()
+    db_connection.close()
+    clear_screen()
     quit()
 
 
-def login():
-    # Gets email / password from user, verifies it
-    # If login is successful, returns True and initializes global variable "user", containing the user's email
-    # If login unsuccessful returns False
-
-    # Get and validate email
-    email = input("\nEmail: ")
-    cursor.execute("SELECT pwd FROM members WHERE email=?;", [email])
-
-    try:
-        # Get password associated to email entered
-        correct_password = cursor.fetchone()[0]
-
-    except TypeError:   # TypeError when the email entered doesn't exist in the database
-        print("\nNo account registered under that email.")
-        return False
-
-    password = getpass.getpass("Password: ")    # Hides input
-
-    if password == correct_password:
-        # User global variable necessary for other functions (e.g. post request requires the posters email)
-        global user
-        user = email
-        print("\nSuccessfully logged in.")
-        return True
-
-    else:
-        print("\nIncorrect password.")
-        return False
-
-
-def register():
+def register(db_connection, cursor):
     # Gets email, name, phone, password from user
     # If no account registered under that email, creates entry in members table
-    # If registration successful, returns True and initializes global variable "user", containing the user's email
-    # Otherwise returns False
+    # User can return to the login menu by pressing enter at any time
 
-    # Get and validate email
-    email = input("\nEmail: ").lower()
-    while len(email) > 15:
-        email = input("\nEmail (15 Character Limit): ").lower()
+    clear_screen()
+    while True:
+        # Validate email
+        email = input("Enter email (15 Character Limit) or press enter to return: ").lower()
+        while len(email) > 15:
+            email = input("Enter email (15 Character Limit) or press enter to return: ").lower()
+        if len(email) == 0:
+            return
 
-    # Make sure no account exists registered to that email
-    cursor.execute("SELECT * FROM members WHERE email=?;", [email])
-    if len(cursor.fetchall()) != 0:     # If len != 0 then an account is already registered under that email
-        print("\nAccount already registered with that email.")
-        return False
+        # Make sure no account exists registered to that email
+        cursor.execute("SELECT * FROM members WHERE email=?;", [email])
+        if len(cursor.fetchall()) != 0:  # If len != 0 then an account is already registered under that email
+            print("\nAccount already registered with that email.\n")
 
-    else:
-        name = input("Name: ")
-        while len(name) > 20:
+        # Email is valid
+        else:
+            # Validate name
             name = input("Name (20 Character Limit): ")
+            while len(name) > 20:
+                name = input("Name (20 Character Limit): ")
+            if len(name) == 0:
+                return
 
-        phone = input("Phone (XXX-XXX-XXXX): ")
-        while len(phone) > 12:
-            name = input("Phone (XXX-XXX-XXXX): ")
+            # Validate phone
+            phone = input("Phone (XXX-XXX-XXXX): ")
+            while len(phone) > 12:
+                phone = input("Phone (XXX-XXX-XXXX): ")
+            if len(phone) == 0:
+                return
 
-        password = getpass.getpass("Password: ")    # Hides input
-        while len(password) > 6:
-            password = getpass.getpass("Password (6 Character Limit): ")
+            # Validate password - also hides input
+            password = getpass.getpass("Password (6 Character Limit): ")  # Hides input
+            while len(password) > 6:
+                password = getpass.getpass("Password (6 Character Limit): ")
+            if len(password) == 0:
+                return
 
-        cursor.execute("INSERT INTO members VALUES (?, ?, ?, ?);", [email, name, phone, password])  # Registers account
+            # Adds newly created account to members table
+            cursor.execute("INSERT INTO members VALUES (?, ?, ?, ?);", [email, name, phone, password])
+            break
 
-        print("\nSuccessfully registered.")
-
-        global user
-        user = email
-
-        return True
+    # Continue to main menu (No messages to see for a newly created account)
+    main_menu(db_connection, cursor, email)
+    db_exit(db_connection)
 
 
-def connect(path):
-    global connection, cursor
+def post_ride_request(cursor, member_email):
+    # The member can post a ride request by providing a date, a pick up location code,
+    # a drop off location code, and the amount willing to pay per seat.
+    # The request id is set to a unique number automatically
+    # Can return by pressing enter at any time (except for when entering amount)
 
-    connection = sqlite3.connect(path)
-    cursor = connection.cursor()
-    cursor.execute('PRAGMA foreign_keys=ON;')
-    connection.commit()
+    clear_screen()
+
+    # Generate request id
+    try:
+        cursor.execute("SELECT MAX(rid) FROM requests;")
+        rid = cursor.fetchone()[0] + 1
+    except:
+        rid = 1  # in case there are no ride requests in the database yet
+
+    # Validate date
+    # Date must match format YYYY-MM-DD and be in the future
+    date = input("Date (YYYY-MM-DD): ")
+    if len(date) == 0:
+        return
+    while not validate_date(date):
+        print("Please enter a valid date.")
+        date = input("Date (YYYY-MM-DD): ")
+        if len(date) == 0:
+            return
+
+    # Get list of location codes
+    location_codes = []
+    cursor.execute("SELECT DISTINCT lcode FROM locations;")
+    for row in cursor:
+        location_codes.append(row[0])
+
+    # Print all location codes
+    print("\nLocation codes:")
+    for i in range(len(location_codes)):
+        if i % 7 == 0 and i // 7 > 0:
+            print("{}".format(location_codes[i]), end="\n")
+        else:
+            print("{}".format(location_codes[i]), end=" ")
+    print()
+
+    # Validate pickup location
+    pickup = input("Pickup location: ").lower()
+    while pickup not in location_codes:
+        if len(pickup) == 0:
+            return
+        pickup = input("Pickup location: ").lower()
+
+    # Validate dropoff location (can't be the same as pickup)
+    dropoff = input("Dropoff location: ").lower()
+    while dropoff not in location_codes or dropoff == pickup:
+        if len(dropoff) == 0:
+            return
+        dropoff = input("Dropoff location: ").lower()
+
+    # Validate amount (non-negative integer)
+    amount = -1
+    while amount < 0:
+        try:
+            amount = int(input("Amount per seat: "))
+        except:
+            pass
+
+    # Insert ride request into database
+    cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, member_email, date, pickup, dropoff, amount])
     return
 
 
-def post_ride_request():
-    # Post ride requests.
-    # The member should be able to post a ride request by providing a date, a pick up location code,
-    # a drop off location code, and the amount willing to pay per seat.
-    # The request rid is set by your system to a unique number and the email is set to the email address of the member.
+def login_menu(db_connection, cursor):
+    # First menu user encounters, allows for logging in, registering a new account and exiting
+    while True:
+        clear_screen()
 
-    cursor.execute("SELECT MAX(rid) FROM requests;")
-    rid = cursor.fetchone()[0] + 1
+        print("Please choose an option:\n")
+        print("1. Login")
+        print("2. Register")
+        print("3. Exit")
 
-    email = user
+        # Validate input
+        choice = input()
+        while choice not in ("1", "2", "3"):
+            choice = input()
 
-    date = input("Date (YYYY-MM-DD): ")
-    pickup = input("Pickup location: ").lower()
-    dropoff = input("Dropoff location: ").lower()
-    amount = int(input("Amount per seat: "))
+        if choice == "1":
+            login(db_connection, cursor)
 
-    cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, email, date, pickup, dropoff, amount])
+        elif choice == "2":
+            register(db_connection, cursor)
 
-    print("\nSuccessfully posted request.")
-
-    return True
+        elif choice == "3":
+            db_exit(db_connection)
 
 
-def ride_search():
+def ride_search(cursor):
     # Searches for a ride
     # Keyword can match either the location code or substring of the city, province
     # or the address fields of the location
@@ -149,7 +209,7 @@ def ride_search():
 
             if not ride_matches:
                 print("\nNo Matches")
-                ride_search()
+                ride_search(cursor)
 
             # if there are matches, list them 5 at a time
 
@@ -198,70 +258,110 @@ def ride_search():
 
                         # if they exit the list, return to search prompt
                         elif prompt == "exit":
-                            ride_search()
+                            ride_search(cursor)
 
     return True
 
 
-def login_loop():
+def main_menu(db_connection, cursor, member_email):
+    # Main menu
     while True:
-        print("\nPlease choose an option:")
-        print("1. Login")
-        print("2. Register")
-        print("3. Quit")
+        clear_screen()
 
-        choice = input()
-
-        while choice not in ("1", "2", "3"):
-            choice = input()
-
-        if choice == "1":
-            if login():
-                logged_in_loop()   # Continue to second loop once successfully logged in
-
-        elif choice == "2":
-            if register():
-                logged_in_loop()   # Continue to second loop once successfully registered
-
-        elif choice == "3":
-            db_exit()
-
-
-def logged_in_loop():
-    # Second loop - post ride request, quit
-    cont = True
-    while cont:
-        print("\nPlease choose an option:")
+        print("Please choose an option:\n")
         print("1. Post Ride Request")
         print("2. Search for Rides")
         print("3. Logout")
-        print("4. Quit")
+        print("4. Exit")
 
+        # Validate input
         choice = input()
-
         while choice not in ("1", "2", "3", "4"):
             choice = input()
 
         if choice == "1":
-            post_ride_request()
+            post_ride_request(cursor, member_email)
 
         elif choice == "2":
-            ride_search()
+            ride_search(cursor)
 
         elif choice == "3":
-            login_loop()
+            login_menu(db_connection, cursor)
 
         elif choice == "4":
-            db_exit()
+            db_exit(db_connection)
+
+
+def login(db_connection, cursor):
+    # Gets email / password from user, verifies it
+    clear_screen()
+
+    while True:
+        while True:
+            email = input("Enter email or press enter to return: ").lower()
+            if email == '':
+                return
+            else:
+                cursor.execute("SELECT pwd FROM members WHERE email=?;", [email])
+
+            try:
+                # Get password associated to email entered
+                correct_password = cursor.fetchone()[0]
+                break
+            except:   # Error when the email entered doesn't exist in the database
+                print("\nNo account registered under that email.\n")
+
+        password = getpass.getpass("Password: ")    # Hides input
+
+        if password == correct_password:
+            inbox(db_connection, cursor, email)  # Continue to inbox
+            db_exit(db_connection)
+
+        else:
+            print("\nIncorrect password.\n")
+
+
+def inbox(db_connection, cursor, member_email):
+    # Displays the user's unread messages
+    clear_screen()
+
+    # Gets all messages sent to user, creates list of unread messages
+    unread_messages = []
+    cursor.execute("SELECT * FROM inbox WHERE email=?;", [member_email])
+    for row in cursor:
+        email, timestamp, sender, content, rno, seen = row
+        if seen == 'n':
+            unread_messages.append([timestamp, sender, content, rno])
+
+    # Prints all unread messages
+    if len(unread_messages) > 0:
+        for message in unread_messages:
+            print("{:<15}      {:>19}".format(message[1], message[0]))
+            print("Regarding ride #{}".format(message[3]))
+            print(message[2])
+            print()
+
+        # Uncomment when done testing
+        # cursor.execute("UPDATE inbox SET seen='y' WHERE email=?;", [member_email])
+
+        input("Press enter to continue to main menu.")
+        main_menu(db_connection, cursor, member_email)
+    else:  # No unread messages - continue straight to main menu
+        main_menu(db_connection, cursor, member_email)
 
 
 def main():
-    path = "./rideshare.db"
-    connect(path)
+    # Setup connection to database
+    path = "./testDatabase.db"
+    db_connection = sqlite3.connect(path)
+    cursor = db_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON;')
+    db_connection.commit()
 
-    login_loop()
+    # Start user at login menu
+    login_menu(db_connection, cursor)
+    db_exit(db_connection)
 
-    db_exit()
 
-
-main()
+if __name__ == "__main__":
+    main()
