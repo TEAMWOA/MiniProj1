@@ -126,12 +126,12 @@ def ride_search():
 
     # recieve input from user and split using blankspace
     prompt = input("\nEnter keywords or 'exit': ").split()
-
     if prompt == "exit":
         return False
     else:
         # for each keyword given, make a sequence ins SQLite
-
+        match_list = []
+        master_list = []
         for each in prompt:
             keyword = "%" + each + "%"
             print(keyword)
@@ -143,67 +143,42 @@ def ride_search():
             # execute query for each keyword
 
             cursor.execute(
-                "SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno, c.cno, c.make, c.model, c.seats, c.owner FROM rides AS r LEFT OUTER JOIN enroute e on r.rno = e.rno LEFT OUTER JOIN locations l1 on r.src = l1.lcode LEFT OUTER JOIN locations l2 on r.dst = l2.lcode LEFT OUTER JOIN cars c on r.cno = c.cno WHERE r.src LIKE ? or r.dst LIKE ? or e.lcode LIKE ? or l1.lcode LIKE ? or l1.city LIKE ? or l1.prov LIKE ? or l1.address LIKE ? or l2.lcode LIKE ? or l2.city LIKE ? or l2.prov LIKE ? or l2.address LIKE ? GROUP BY r.rno;",
+                "SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno, c.make, c.model, c.year, c.seats FROM rides AS r LEFT OUTER JOIN enroute e on r.rno = e.rno LEFT OUTER JOIN locations l1 on r.src = l1.lcode LEFT OUTER JOIN locations l2 on r.dst = l2.lcode LEFT OUTER JOIN cars c on r.cno = c.cno WHERE r.src LIKE ? COLLATE NOCASE or r.dst LIKE ? COLLATE NOCASE or e.lcode LIKE ? COLLATE NOCASE or l1.lcode LIKE ? COLLATE NOCASE or l1.city LIKE ? COLLATE NOCASE or l1.prov LIKE ? COLLATE NOCASE or l1.address LIKE ? COLLATE NOCASE or l2.lcode LIKE ? COLLATE NOCASE or l2.city LIKE ? COLLATE NOCASE or l2.prov LIKE ? COLLATE NOCASE or l2.address LIKE ? COLLATE NOCASE GROUP BY r.rno;",
                 keyword)
 
             # fetch all the matches for each keyword
             ride_matches = cursor.fetchall()
-
-            # if there is none, provide message and ask again
-
-            if not ride_matches:
-                print("\nNo Matches")
-                ride_search()
-
-            # if there are matches, list them 5 at a time
-
+            
+            if len(master_list) == 0:
+                for each in ride_matches:
+                    master_list.append(each)
             else:
-                print("\n")
-                limit = 5
-                i = 0
-                j = 0
-                num_matches = len(ride_matches)
-                num_columns = len(ride_matches[0])
-                while i < (num_matches - 1):
-
-                    # If we've shown all results provide a message
-                    # go back to main menu
-
-                    if i == (num_matches - 1):
-                        print("\nNo More Results")
-                        break
-                    elif j == (num_columns - 1):
-                        break
-                    else:
-
-                        # print the first 5 results
-
-                        while j < limit and prompt != "Exit":
-                            try:
-                                print(*ride_matches[j])
-                                j += 1
-                                i += 1
-                            except IndexError:
-                                print("\nNo More Results")
-                                return False
-
-                        # if there are more results, ask the user
-                        # if they want to see more or exit the list
-
-                        prompt = input("\nPress Enter For More or 'exit': ")
-
-                        # if they press enter to see more
-                        # increase the limit and list the next 5
-                        # matches until all matches are listed
-
-                        if len(prompt) == 0:
-                            limit += 5
-                            print("\n")
-
-                        # if they exit the list, return to search prompt
-                        elif prompt == "exit":
-                            ride_search()
-
+                master_list[:] = [each for each in ride_matches if each in master_list]
+                
+        master_list = list(master_list)
+        for each, ride in enumerate(master_list):
+            ride = list(ride)
+            master_list[each] = ride
+            for each, value in enumerate(ride):
+                if value is None:
+                    ride[each] = ""
+       
+        stop_list = False
+        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price","date","seats","LugDesc","src","dst","driver","cno","make","model","year","seats"))
+        while stop_list == False:
+            for count, each in enumerate(master_list):
+                print("\n{:^5}{:^5}{:^10}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format(each[0],each[1],each[2],each[3],each[4],each[5],each[6],each[7],each[8],each[9],each[10],each[11],each[12],))
+                if (count == len(master_list)-1) or count > 0 and (count % 4) == 0:
+                    prompt = input("\nEnter a ride number or return to see more: ").strip()
+                    if prompt == "":
+                        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price","date","seats","LugDesc","src","dst","driver","cno","make","model","year","seats"))
+                        continue
+                    elif prompt.isdigit():
+                        stop_list == True
+                        message()
+                    elif prompt == 'exit':
+                        stop_list == True
+                        exit()           
     return True
 
 
@@ -219,17 +194,19 @@ def add_booking():
     
     user = 'joe@gmail.com'
     user = (user,)
+    valid_rno = False
+    valid_cost = False
+    ride_numbers = []
     
     # retrieve all FUTURE rides offered by the user
     cursor.execute("SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno FROM rides r WHERE driver = ? and rdate > date('now')", user)
     
     # fetch the ride matches
     ride_matches = cursor.fetchall()
-    ride_numbers = []
     
     #  if there are none, tell the user, and ask if they want to offer a ride
     if not ride_matches:
-        prompt = input("\nYou Have Not Offered Any Rides\nDo You Want To Offer A Ride?\nYes/No: ")
+        prompt = input("\nYou Have Not Offered Any Rides\nDo You Want To Offer A Ride?\nYes/No: ").strip()
         if prompt.strip() == 'yes':
             offer_ride()
         elif prompt.strip() == 'no':
@@ -239,24 +216,45 @@ def add_booking():
     # make a list of ride_numbers for easier reference
     else:
         
+        # print the rides one at a time
+        ride_matches = list(ride_matches)
+        for each, ride in enumerate(ride_matches):
+            ride = list(ride)
+            ride_matches[each] = ride
+            for each, value in enumerate(ride):
+                if value is None:
+                    ride[each] = ""
+                    
+        stop_list = False
         print("\nHere Are Your Future Rides: \n")
+        global num_rides
+        num_rides = (len(ride_matches)-1)
         for each in ride_matches:
-            print(*each)
-            ride_numbers.append(each["rno"])
-            
-    
-    # User picks a ride they want to book on         
-    choice = (input("\nEnter The Ride Number To Book or Enter to see more: "))
-    
-    
-    #will only accept integer for ride number matches
-    while not choice.isdigit():
-        choice = (input("\nEnter The Ride Number To Book or Enter to see more: "))
-        
+            ride_numbers.append(each[0])
+        while stop_list == False:
+            print("\n{:^5}{:^7}{:^12}{:^5}{:^15}{:^5}{:^5}{:^20}{:^5}".format('rno','price','date','seats','lugDesc','src','dst','driver','cno'))
+            for count, ride in enumerate(ride_matches):
+                print("\n{:^5}{:^7}{:^12}{:^5}{:^15}{:^5}{:^5}{:^20}{:^5}".format(ride[0],ride[1],ride[2],ride[3],ride[4],ride[5],ride[6],ride[7],ride[8]))
+                if (count == num_rides) or count > 0 and (count % 4) == 0:
+                    prompt = input("\nEnter a ride number or return to see more: ").strip()                
+                    if prompt == "":
+                        print("\n{:^5}{:^7}{:^12}{:^5}{:^15}{:^5}{:^5}{:^20}{:^5}".format(ride[0],ride[1],ride[2],ride[3],ride[4],ride[5],ride[6],ride[7],ride[8]))
+                        continue
+                    elif prompt == 'exit':
+                        stop_list = True
+                        exit()
+                    elif prompt.isdigit():
+                        stop_list = True
+                        break
+                        
+                
+            # User picks a ride they want to book on         
+        choice = prompt        
+  
     #Check if the ride_number belongs to one of the users    
     for each in ride_matches:
-        while int(choice) not in ride_numbers:
-            choice = input("\nInvalid ride number, try again: ")
+            while not choice.isdigit() or int(choice) not in ride_numbers:
+                choice = input("\nInvalid ride number, try again: ")
             
     ride_num = int(choice)
     
@@ -269,9 +267,11 @@ def add_booking():
     # if it is full, return a message asking to proceed
     if seats_available == 0:
         proceed = ("\nThis ride is full! Proceed?\n(yes/no)").strip()
-        if proceed == 'no':
+        while prompt != 'no' or prompt!= 'yes':
+            proceed= input("\nPlease enter yes or no: ").strip()        
+        if proceed.lower() == 'no':
             add_booking()
-        elif proceed == 'yes':
+        elif proceed.lower() == 'yes':
             pass
    
     #If there are available seats, create new bookings number
@@ -290,41 +290,47 @@ def add_booking():
         #Check that they input an int only
         seats_to_book =input("\nHow many seats are being booked? ").strip()
         while not seats_to_book.isdigit():
-            seats_to_book = input("\nEnter the number of seats being booked: ")
+            seats_to_book = input("\nEnter the number of seats being booked: ").strip()
         
         
         # If we are over the seat limit
         if int(seats_to_book) > seats_available:
-            prompt = input("\nAttempting to overbook! Proceed?\n(yes/no): ")
-            if prompt == 'no':
+            prompt = input("\nAttempting to overbook! Proceed?\n(yes/no): ").strip()
+            while prompt not in ('no','yes'):
+                prompt = input("\nPlease enter yes or no: ").strip()
+            if prompt.lower() == 'no':
                 add_booking()
-            elif prompt == 'yes':
+            elif prompt.lower() == 'yes':
                 seats_to_book = int(seats_to_book)
         
         #recieve the cost per seat and make sure a digit is put in
         # then change it into a float before putting in db
         
-        cost_per_seat = input("\nEnter the cost per seat: ")
-        while not cost_per_seat.isdigit():
-            
-            cost_per_seat = input("\nEnter the cost per seat: ")
+        while valid_cost == False:
+            try:
+                cost_per_seat = input("\nEnter the cost per seat: ").strip()
+                float(cost_per_seat)
+                valid_cost == True
+            except ValueError:
+                cost_per_seat = print("\nInvalid Price!! Numbers only")
         
         #recieve the pickup code, then check for validity
-        pickup = input("\nEnter the pickup location code: ")
-    
+        pickup = input("\nEnter the pickup location code: ").strip()
         while not valid_lcode(pickup):
-            pickup = input("\nInvalid location code, try again: ")
+            pickup = input("\nInvalid location code, try again: ").strip()
         
-        # Receieve the dropff code, then check for validity
-        dropoff = input("\nEnter the dropoff location code: ")
+        # Recieve the dropff code, then check for validity
+        dropoff = input("\nEnter the dropoff location code: ").strip()
         while not valid_lcode(dropoff):
-            dropoff = input("\nInvalid location code, try again: ")
+            dropoff = input("\nInvalid location code, try again: ").strip()
         
         #The list of the new booking info    
         new_booking = (new_bno, member_to_book, choice , cost_per_seat, seats_to_book, pickup, dropoff,)
         
         # GEt final prompt from user
         prompt = input("\nConfirm Booking? (yes/no):   ").strip()
+        while prompt != 'no' or prompt!= 'yes':
+            prompt= input("\nPlease enter yes or no: ").strip()
         if prompt == "yes":
         # Insert the new bookings into the table
             cursor.execute("INSERT INTO BOOKINGS VALUES(?,?,?,?,?,?,?)", new_booking)
@@ -336,6 +342,8 @@ def add_booking():
             
             # after booking, prompt to make another one
             prompt = input("\nBooking Confirmed. Would you like to make another one?\n(yes/no): ").strip()
+            while prompt != 'no' or prompt!= 'yes':
+                prompt= input("\nPlease enter yes or no: ").strip()            
             if prompt == "yes":
                 add_booking()
             elif prompt == "no":
@@ -343,17 +351,141 @@ def add_booking():
         elif prompt == "no":
             add_booking()
         
-
-       
     return True
+def cancel_booking():
+    
+    # Retreive all bookings on rides offered by current user and cancel
+    # specified booking(s)
+    
+    email = "joe@gmail.com"
+    user = (email,)
+    
+    valid_rno = False
+
+    # retrieve all FUTURE bookings offered by the user
+    cursor.execute("SELECT distinct bno, email, b.rno, cost, b.seats, pickup, dropoff  FROM rides r, bookings b WHERE driver = ? and rdate > date('now') and b.rno = r.rno", user)
+    
+    # fetch the bookings matches
+    bookings = cursor.fetchall()
+    booking_numbers = []
+    
+    #  if there are none, tell the user, and ask if they want to make a booking
+    if not bookings:
+        prompt = input("\nYou Have no rides booked. Would you like to add a booking?\nYes/No: ").strip()
+        if prompt == 'yes':
+            add_booking()
+        elif prompt == 'no':
+            logged_in_loop()
+    
+    # Print all the bookings 
+    # make a list of booking numbers for easier reference
+    else:
+        #check for nonetypes and replace them with an empty string
+        bookings = list(bookings)
+        for each, booking in enumerate(bookings):
+            booking = list(booking)
+            bookings[each] = booking
+            for each, value in enumerate(booking):
+                if value is None:
+                    booking[each] = ""
+                  
+        stop_list = False
+        num_rides = (len(bookings)-1)
+        for ride in bookings:
+            booking_numbers.append(ride[0])        
+        print("\nHere are the bookings on your rides: \n")
+        while stop_list == False:
+            print("\n{:^5}{:^15}{:^5}{:^7}{:^7}{:^10}{:^10}".format('bno','email','rno','cost','seats','pickup','dropoff'))
+            for count, ride in enumerate(bookings):
+                
+                print("\n{:^5}{:^15}{:^5}{:^7}{:^7}{:^10}{:^10}".format(ride[0],ride[1],ride[2],ride[3],ride[4],ride[5],ride[6]))
+                if (count == num_rides) or count > 0 and (count % 4) == 0:
+                    prompt = input("\nEnter a booking to cancel or return to see more: ")                
+                    if prompt == "":
+                        print("\n{:^5}{:^15}{:^5}{:^5}{:^3}{:^6}{:^6}".format(ride[0],ride[1],ride[2],ride[3],ride[4],ride[5],ride[6]))
+                        continue
+                    elif prompt == 'exit':
+                        stop_list = True
+                        exit()
+                    elif prompt.isdigit():
+                        stop_list = True
+                        break                
+            
+            
+    # recieve the bookings number of booking to cancel
+    # ensure it belongs to the user
+    bno = prompt
+    while not bno.isdigit() or int(bno) not in booking_numbers:
+        booking_to_cancel = input("\nInvalid booking number, try again: ").strip()
+        
+    
+    
+    # get the number of seats that was booked on this ride
+    booking_to_cancel = (bno,)
+    cursor.execute("SELECT seats,email FROM bookings where bno = ?",(booking_to_cancel,))
+    vacant_seats = cursor.fetchone()[0]
+    bookee = cursor.fetchone()[1]
+    
+    
+    print("\nCancelling this booking will free up", vacant_seats, "seats" )
+    print(bookee, "will be notified of the cancellation")
+    prompt = input("Cancel this booking? (yes/no): ")
+    if prompt.lower == 'no':
+        cancel_booking()
+    elif prompt.lower() == 'yes':
+        
+        # get the number of seats still available and associated ride number
+        cursor.execute("SELECT r.rno, r.seats FROM rides r, bookings b where bno = ? and r.rno = b.rno",(booking_to_cancel,))
+        ride_info = cursor.fetchall()
+        ride_num = ride_info[0][0]
+        seats_available = ride_info[0][1]
+        
+        #Delete the booking for the table
+        cursor.execute("DELETE FROM bookings WHERE bno = ?", (booking_to_cancel,))
+        
+        #Add the open seats back into the table
+        seats_left =  int(seats_available) + int(vacant_seats)
+        ride_info = (seats_left, ride_num,)
+        cursor.execute("UPDATE rides SET seats = ? where rno = ? ",ride_info)
+        cancellation_message = "\nYour booking on ride" + ride_num + "has been cancelled by the driver\n"
+        
+        print("\nBooking",booking_to_cancel,"has been cancelled")
+        #message the member about their booking being cancelled
+        if message_member(user,bookee,message,ride_num):
+            print(bookee, "has been notified.")
+        # ask if they want to cancel another bookings
+        prompt = input("\nCancel another booking? (yes/no): ").split()
+        if prompt == 'no':
+            logged_in_loop()
+        elif prompt == 'yes':
+            cancel_booking()
+        
+    
+    
+    return True
+def message_member(user, bookee, message, rno):
+    
+    sender = user
+    email = bookee
+    content = message
+    seen = 'n'
+    rno = rno
+    
+    new_message = (email,sender, content,rno,seen,)
+    
+    cursor.execute("INSERT INTO inbox VALUES(?,date('now'),?,?,?,? ", new_message)
+    
+    
+    return True
+
 def valid_user(member_to_book):
-    valid = False
+    valid_user = False
     user = (member_to_book,)
     cursor.execute("SELECT name from members where email = ? ",user)
     if cursor.fetchone():
-        valid = True
+        valid_user = True
         
-    return valid
+    return valid_user
 
 def valid_lcode(lcode):
     valid = False
@@ -362,13 +494,6 @@ def valid_lcode(lcode):
     if cursor.fetchone():
         valid = True
     return valid
-
-def cancel_booking():
-    
-    # Retreive all bookings on rides offered by current user and cancel
-    # specified booking(s)
-    
-    return
 
 
 def login_loop():
@@ -431,8 +556,7 @@ def main():
     path = "./rideshare.db"
     connect(path)
 
-    add_booking()
-
+    ride_search()
     db_exit()
 
 
