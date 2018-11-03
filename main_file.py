@@ -1,7 +1,8 @@
 import sqlite3
 import getpass
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import sys
 
 
 def validate_date(date):
@@ -9,10 +10,8 @@ def validate_date(date):
     # Returns True if valid, False otherwise
     try:
         date = datetime.strptime(date, '%Y-%m-%d')
-        if date > datetime.now():
+        if date >= (datetime.now() - timedelta(days=1)):
             return True
-        else:
-            return False
     except:
         return False
 
@@ -352,7 +351,11 @@ def inbox(db_connection, cursor, member_email):
 
 def main():
     # Setup connection to database
-    path = "./testDatabase.db"
+    if len(sys.argv) != 2:
+        print("Please pass the database file as a command line argument (dbname.db)")
+        exit()
+
+    path = "./{}".format(sys.argv[1])
     db_connection = sqlite3.connect(path)
     cursor = db_connection.cursor()
     cursor.execute('PRAGMA foreign_keys=ON;')
