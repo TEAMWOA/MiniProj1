@@ -463,17 +463,17 @@ def cancel_booking():
     
     
     return True
-def message_member(user, bookee, message, rno):
+def message_member(user, bookee, message, ride_num):
     
     sender = user
-    email = bookee
+    email = 'bookee'
     content = message
     seen = 'n'
-    rno = rno
+    rno = ride_num
     
-    new_message = (email,sender, content,rno,seen,)
+    new_message = (email,sender, content, rno,seen,)
     
-    cursor.execute("INSERT INTO inbox VALUES(?,date('now'),?,?,?,? ", new_message)
+    cursor.execute("INSERT INTO inbox VALUES(?,datetime('now'),?,?,?,?) ", new_message)
     
     
     return True
@@ -555,8 +555,6 @@ def logged_in_loop():
 def main():
     path = "./rideshare.db"
     connect(path)
-
-    ride_search()
     db_exit()
 
 
