@@ -58,12 +58,22 @@ def register(db_connection, cursor):
 def login(db_connection, cursor):
     # Gets email / password from user, verifies it
     clear_screen()
+    print("\n")
+    print("    ##################")
+    print("    ####          ####")
+    print("    ###   LOG IN   ###")
+    print("    ####          ####")    
+    print("    ##################\n\n")
 
     while True:
         while True:
             email = input("Enter email or press enter to return: ").lower()
             if email == '':
+                #login_menu(db_connection, cursor) # THIS ISNT WOKRING FOR SOME REASON
                 return
+                
+            if email =='exit':
+                db_exit(db_connection)
             else:
                 cursor.execute("SELECT pwd FROM members WHERE email=? COLLATE NOCASE;", [email])
 

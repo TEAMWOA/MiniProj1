@@ -2,8 +2,9 @@
 #
 #
 import os
-import time
-from datetime import *
+import time 
+import datetime
+import sys
 
 
 def validate_date(date):
@@ -22,7 +23,7 @@ def clear_screen():
     os.system("clear")
 
 
-def db_exit(db_connection):
+def db_exit():
     # Commits to database, closes connection and clears screen prior to quitting
     print('\n\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
     print("    ###################")
@@ -30,9 +31,11 @@ def db_exit(db_connection):
     print("    ##  SeeYouAgain  ##")
     print("    ####           ####")    
     print("    ###################\n")
-    print('\n    . . . .... .... ..\n                ... . ..... .. .. ')
-    time.sleep(2) 
-    db_connection.commit()
-    db_connection.close()
-    clear_screen()
-    quit()
+    print('\n    . . . .... .... ..\n                ... . ..... .. .. ') 
+    
+    
+#     db_connection.commit()
+#     db_connection.close()
+#     quit()
+    time.sleep(1.5) 
+    sys.exit()

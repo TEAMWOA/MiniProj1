@@ -1,5 +1,5 @@
 # Menus
-# (1) Login/SignUp
+# (1) Login/SignUp [authentications]
 # (2) MainMenu
 # (3) Inbox
 #
@@ -15,25 +15,42 @@ def login_menu(db_connection, cursor):
     # First menu user encounters, allows for logging in, registering a new account and exiting
     while True:
         clear_screen()
+        
+        print("\n")
+        print("    ######################")
+        print("    ####              ####")
+        print("    ### AUTHENTICATION ###")
+        print("    ####              ####")    
+        print("    ######################\n\n")
+        print("> Select a number option from the menu\n< Type EXIT to end the program >\n")
 
-        print("Please choose an option:\n")
         print("1. Login")
         print("2. Register")
         print("3. Exit")
 
         # Validate input
-        choice = input()
-        while choice not in ("1", "2", "3"):
+        valid_choice = False
+        
+        while not valid_choice:
             choice = input()
+            
+            if choice == "1":
+                login(db_connection, cursor)
 
-        if choice == "1":
-            login(db_connection, cursor)
+            elif choice == "2":
+                register(db_connection, cursor)
 
-        elif choice == "2":
-            register(db_connection, cursor)
-
-        elif choice == "3":
-            db_exit(db_connection)
+            elif choice == "3":
+               # db_exit(db_connection)
+                db_exit()
+        
+            elif (choice.upper() == "EXIT"):
+                #db_exit(db_connection)
+                db_exit()
+            
+            else:
+                print("\n\n*** < {} > is not a menu option. Try again\n*** ".format(choice)) #will show the user what they inputted wrong
+                continue
 
 
 def main_menu(db_connection, cursor, member_email):
@@ -54,7 +71,7 @@ def main_menu(db_connection, cursor, member_email):
         print("1. Search for Rides")
         print("2. Post Ride Request")
         print("3. Offer Ride")
-        print("R E Q U E S T S")
+        #print("R E Q U E S T S")
         print("4. Search for Ride Requests")
         print("5. Delete Ride Requests")
         print("6. Cancel Ride Booking")
@@ -84,17 +101,18 @@ def main_menu(db_connection, cursor, member_email):
             print("############")
             print("############ #############")
             print("############ ############# ############")
-            time.sleep(1.5)
+            #time.sleep(1.5)
             clear_screen()
             login_menu(db_connection, cursor)
 
         elif choice == "10":
-            time.sleep(0.5)
-            db_exit(db_connection)
+            #time.sleep(0.5)
+            #db_exit(db_connection)
+            db_exit()
             
         elif(choice.upper() == "EXIT"):
-            time.sleep(0.5)
-            exit()
+            #time.sleep(0.5)
+            db_exit()
         
         else:
             clear_screen()
