@@ -1,4 +1,8 @@
+# Utility functions for the program
+#
+#
 import os
+import time
 from datetime import *
 
 
@@ -20,6 +24,14 @@ def clear_screen():
 
 def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
+    print('\n\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
+    print("    ###################")
+    print("    ####           ####")
+    print("    ##  SeeYouAgain  ##")
+    print("    ####           ####")    
+    print("    ###################\n")
+    print('\n    . . . .... .... ..\n                ... . ..... .. .. ')
+    time.sleep(2) 
     db_connection.commit()
     db_connection.close()
     clear_screen()
