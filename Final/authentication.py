@@ -1,3 +1,9 @@
+# Authentication
+# (1) register(db_connection, cursor)
+# (2) login(db_connection, cursor)
+#
+#
+
 import getpass
 
 from menus import *
@@ -69,7 +75,7 @@ def login(db_connection, cursor):
         while True:
             email = input("Enter email or press enter to return: ").lower()
             if email == '':
-                #login_menu(db_connection, cursor) # THIS ISNT WOKRING FOR SOME REASON
+                #login_menu(db_connection, cursor) # THIS ISNT WORKING FOR SOME REASON
                 return
                 
             if email =='exit':

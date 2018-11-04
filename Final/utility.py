@@ -1,4 +1,7 @@
 # Utility functions for the program
+# (1) validate_date(date)
+# (2) clear_screen()
+# (3) db_exit()
 #
 #
 import os

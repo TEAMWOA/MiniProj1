@@ -1,3 +1,7 @@
+# Ride Module
+#
+#
+
 def ride_search(cursor):
     # Searches for a ride
     # Keyword can match either the location code or substring of the city, province
