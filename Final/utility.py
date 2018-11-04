@@ -26,7 +26,7 @@ def clear_screen():
     os.system("clear")
 
 
-def db_exit():
+def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
     print('\n\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
     print("    ###################")
@@ -37,8 +37,8 @@ def db_exit():
     print('\n    . . . .... .... ..\n                ... . ..... .. .. ') 
     
     
-#     db_connection.commit()
-#     db_connection.close()
+    db_connection.commit()
+    db_connection.close()
 #     quit()
     time.sleep(1.5) 
     sys.exit()

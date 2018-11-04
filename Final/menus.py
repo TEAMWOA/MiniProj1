@@ -41,12 +41,12 @@ def login_menu(db_connection, cursor):
                 register(db_connection, cursor)
 
             elif choice == "3":
-               # db_exit(db_connection)
-                db_exit()
+                db_exit(db_connection)
+                #db_exit()
         
             elif (choice.upper() == "EXIT"):
-                #db_exit(db_connection)
-                db_exit()
+                db_exit(db_connection)
+                #db_exit()
             
             else:
                 print("\n\n*** < {} > is not a menu option. Try again\n*** ".format(choice)) #will show the user what they inputted wrong
@@ -107,12 +107,13 @@ def main_menu(db_connection, cursor, member_email):
 
         elif choice == "10":
             #time.sleep(0.5)
-            #db_exit(db_connection)
-            db_exit()
+            db_exit(db_connection)
+            #db_exit()
             
         elif(choice.upper() == "EXIT"):
             #time.sleep(0.5)
-            db_exit()
+            db_exit(db_connection)
+            #db_exit()
         
         else:
             clear_screen()
