@@ -1,62 +1,123 @@
+# Menus
+# (1) Login/SignUp [authentications]
+# (2) MainMenu
+# (3) Inbox
+#
 from requests import *
 from rides import *
 from authentication import *
 from utility import *
+
+import time #time delay
 
 
 def login_menu(db_connection, cursor):
     # First menu user encounters, allows for logging in, registering a new account and exiting
     while True:
         clear_screen()
+        
+        print("\n")
+        print("    ######################")
+        print("    ####              ####")
+        print("    ### AUTHENTICATION ###")
+        print("    ####              ####")    
+        print("    ######################\n\n")
+        print("> Select a number option from the menu\n< Type EXIT to end the program >\n")
 
-        print("Please choose an option:\n")
         print("1. Login")
         print("2. Register")
         print("3. Exit")
 
         # Validate input
-        choice = input()
-        while choice not in ("1", "2", "3"):
+        valid_choice = False
+        
+        while not valid_choice:
             choice = input()
+            
+            if choice == "1":
+                login(db_connection, cursor)
 
-        if choice == "1":
-            login(db_connection, cursor)
+            elif choice == "2":
+                register(db_connection, cursor)
 
-        elif choice == "2":
-            register(db_connection, cursor)
-
-        elif choice == "3":
-            db_exit(db_connection)
+            elif choice == "3":
+                db_exit(db_connection)
+                #db_exit()
+        
+            elif (choice.upper() == "EXIT"):
+                db_exit(db_connection)
+                #db_exit()
+            
+            else:
+                print("\n\n*** < {} > is not a menu option. Try again\n*** ".format(choice)) #will show the user what they inputted wrong
+                continue
 
 
 def main_menu(db_connection, cursor, member_email):
     # Main menu
     while True:
         clear_screen()
-
-        print("Please choose an option:\n")
-        print("1. Post Ride Request")
-        print("2. Search for Rides")
-        print("3. Logout")
-        print("4. Exit")
+        
+        print("\n")
+        print("    ##################")
+        print("    ####          ####")
+        print("    ### MAIN  MENU ###")
+        print("    ####          ####")    
+        print("    ##################\n\n")
+        print("> Select a number option from the menu <\n")
+    
+        print("\n> Select a number option from the menu\n< Type EXIT to end the program >\n")
+        print("R I D E S ")
+        print("1. Search for Rides")
+        print("2. Post Ride Request")
+        print("3. Offer Ride")
+        #print("R E Q U E S T S")
+        print("4. Search for Ride Requests")
+        print("5. Delete Ride Requests")
+        print("6. Cancel Ride Booking")
+        print("7. Book Member on a Ride")
+        print("8. Inbox")
+        print("9. Logout")
+        print("10. Exit")
 
         # Validate input
         choice = input()
-        while choice not in ("1", "2", "3", "4"):
+        while choice not in ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"):
             choice = input()
 
         if choice == "1":
+            ride_search(cursor)
+            
+        elif choice == "2":
             post_ride_request(cursor, member_email)
 
-        elif choice == "2":
-            ride_search(cursor)
-
-        elif choice == "3":
+        elif choice == "9":
+            clear_screen()
+            print("\n\n\n\n############ ############# ############")
+            print("############ #############")
+            print("############")
+            print("L O G G I N G   O U T . . . .... .. ............")
+            print("..... .. ..... ..     . ...... ...... ..")
+            print("############")
+            print("############ #############")
+            print("############ ############# ############")
+            #time.sleep(1.5)
+            clear_screen()
             login_menu(db_connection, cursor)
 
-        elif choice == "4":
+        elif choice == "10":
+            #time.sleep(0.5)
             db_exit(db_connection)
-
+            #db_exit()
+            
+        elif(choice.upper() == "EXIT"):
+            #time.sleep(0.5)
+            db_exit(db_connection)
+            #db_exit()
+        
+        else:
+            clear_screen()
+            print("\n\n*** < {} > is not a menu option. Try again\n*** ".format(choice)) #will show the user what they inputted wrong
 
 def inbox(db_connection, cursor, member_email):
     # Displays the user's unread messages
