@@ -1,17 +1,13 @@
 # Menus
-
-# (1) login_menu(db_connection, cursor)
-# (2) main_menu(db_connection, cursor, member_email)
-# (3) inbox(db_connection, cursor, member_email)
-# (4) login(db_connection, cursor)
-# (5) register(db_connection, cursor)
+#
+# 1. login_menu(db_connection, cursor)
+# 2. main_menu(db_connection, cursor, member_email)
+# 3. inbox(db_connection, cursor, member_email)
+# 4. login(db_connection, cursor)
+# 5. register(db_connection, cursor)
 #
 #
 #
-# from requests import *
-# from rides import *
-# from authentication import *
-# from utility import *
 import sqlite3
 import sys
 import time
@@ -23,7 +19,6 @@ import time #time delay
 from utility import *
 import requests
 import rides
-#import bookings
 from add_booking import *
 from cancel_booking import *
 

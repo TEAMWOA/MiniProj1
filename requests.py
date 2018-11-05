@@ -14,7 +14,10 @@ import menus
 from time import sleep
 from utility import *
 
-
+################################################################
+#
+# 1. Post Ride Requests
+#
 def post_ride_request(db_connection, cursor, member_email):
     # The member can post a ride request by providing a date, a pick up location code,
     # a drop off location code, and the amount willing to pay per seat.
