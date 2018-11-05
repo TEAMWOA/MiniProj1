@@ -1,4 +1,5 @@
 from utility import *
+from rides import *
 import menus
 
 
