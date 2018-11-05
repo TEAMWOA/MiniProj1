@@ -305,7 +305,7 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
 
                 elif '1' <= choice <= '5':
                     #MESSAGE MEMBER
-                    messageMember(db_connection, cursor, int(choice) - 1, member_email, displayedRequests)
+                    messageMember(db_connection, int(choice) - 1, member_email, displayedRequests)
                     return #return to main request screen
 
                 else: #invalid input
@@ -328,7 +328,7 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
  
         elif '1' <= choice <= str(len(displayedRequests)): #may not be 5 displayed requests
             #MESSAGE MEMBER
-            messageMember(db_connection, cursor, int(choice) - 1, member_email, displayedRequests)
+            messageMember(db_connection, int(choice) - 1, member_email, displayedRequests)
             return  # return to main request selection screen
 
         return
@@ -339,17 +339,54 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
 #
 #    
 
-def messageMember(db_connection, cursor, row, member_email, displayedResults):
+def messageMember(db_connection, row, member_email, displayedRequests):
 
-    rno = displayedResults[row][0]
-    poster = displayedResults[row][1]
+    cursor = db_connection.cursor()
+    request = displayedRequests[row]
     
-    message = input(("\n>Type a message to send to {} :\n").format(poster))
-    # insert inputted message into the table
-    cursor.execute(("INSERT INTO inbox VALUES (?, datetime('now'), ?, ?, ?, 'n');"),[poster, member_email, message, rno])
+    print('request',request)
+    trueRNO = False
+    
+    #RNO     
+    while trueRNO == False:
+        rno = input("\n   Enter a ride number\n < Press ENTER to skip > ")
+        if rno.isdigit():
+            cursor.execute("SELECT rno, driver FROM rides WHERE rno = ?;",[rno])
+            rnos = cursor.fetchall()
+            if len(rnos) == 0:
+                print("***\n*** Invalid rno. Try again\n*** ")
+                continue
+            elif len(rnos) == 1:
+                trueRNO = True
+            else:
+                print("***\n*** Something went wrong. Try again\n*** ")
+                continue
+        elif rno == "":
+            trueRNO = True
+            rno = None
+        else:
+            print("***\n*** Something went wrong. Try again\n***")
+            continue     
+    
+    #Messgae
+    rid = request[0]
+    poster = request[1]
+    
+    timestamp = datetime.now()
+    timestamp = str(timestamp)[:19]
+    print("\n>Type a message to send  ...  . . ... :\n")
+    message = input() 
+#     print(poster)
+#     print(timestamp)
+#     print(member_email)
+#     print(message)
+#     print(rid)
 
-    print(">Message [{}] sent to {}.. .. . ..").format(message, poster)
-    database.commit()
+    # insert inputted message into the table
+    cursor.execute(("INSERT INTO inbox VALUES (?, ?, ?, ?, ?, 'n');"),[request[1], timestamp, member_email, message, rno])
+
+    print(">Message sent! .. .. . ..")#.format(message, poster)
+    db_connection.commit()
     sleep(1.4)
     return
 
