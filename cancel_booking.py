@@ -63,6 +63,8 @@ def cancel_booking(db_connection, cursor, member_email):
     bno = prompt
     while not bno.isdigit() or int(bno) not in booking_numbers:
         bno = input("\nInvalid booking number, try again: ").strip()
+        if bno.lower == 'exit':
+            menus.main_menu(db_connection, cursor, member_email)
         
     bno = int(bno)
     
