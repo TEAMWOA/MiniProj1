@@ -8,10 +8,6 @@
 #
 #
 #
-# from requests import *
-# from rides import *
-# from authentication import *
-# from utility import *
 import sqlite3
 import sys
 import time
@@ -23,7 +19,6 @@ import time #time delay
 from utility import *
 import requests
 import rides
-#import bookings
 from add_booking import *
 from cancel_booking import *
 
