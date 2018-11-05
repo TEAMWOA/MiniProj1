@@ -6,7 +6,8 @@
 
 import getpass
 
-from menus import *
+from time import sleep
+import menus
 from utility import *
 
 
@@ -64,7 +65,7 @@ def register(db_connection, cursor):
             trueName = True
 
     while truePhone == False:
-        phone = input("  Phone (ex.xxx-xxx-xxxx): ")
+        phone = input("  Phone (xxx-xxx-xxxx): ")
         if(phone.upper() == "EXIT"):
             exit()
         if(phone.upper() == "BACK"):
@@ -95,9 +96,12 @@ def register(db_connection, cursor):
             truePWD = True
 
     cursor.execute("INSERT INTO members VALUES (\""+email+"\",\""+name+"\",\""+phone+"\",\""+password+"\")")
+    db_connection.commit()
     print("***\n*** You're now successfully registered!\n***")
+    sleep(2)
     
-    return email
+    menus.main_menu(db_connection, cursor, email)
+    db_exit(db_connection)
 
 #     clear_screen()
 #     while True:
@@ -186,7 +190,7 @@ def login(db_connection, cursor):
         password = getpass.getpass("Password: ")    # Hides input
 
         if password == correct_password:
-            inbox(db_connection, cursor, email)  # Continue to inbox
+            menus.inbox(db_connection, cursor, email)  # Continue to inbox
             db_exit(db_connection)
 
         else:

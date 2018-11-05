@@ -5,7 +5,7 @@
 from utility import *
 
 
-def post_ride_request(cursor, member_email):
+def post_ride_request(db_connection, cursor, member_email):
     # The member can post a ride request by providing a date, a pick up location code,
     # a drop off location code, and the amount willing to pay per seat.
     # The request id is set to a unique number automatically
@@ -70,4 +70,5 @@ def post_ride_request(cursor, member_email):
 
     # Insert ride request into database
     cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, member_email, date, pickup, dropoff, amount])
+    db_connection.commit()
     return

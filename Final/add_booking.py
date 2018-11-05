@@ -1,3 +1,6 @@
+from utility import *
+import menus
+
 def add_booking(db_connection, cursor, member_email):
     
     # list all rides offered by the user then select a ride to book a member
@@ -173,7 +176,7 @@ def add_booking(db_connection, cursor, member_email):
             if prompt == "yes":
                 add_booking(db_connection, cursor, member_email)
             elif prompt == "no":
-                emain_menu(db_connection, cursor, member_email)
+                menus.main_menu(db_connection, cursor, member_email)
         elif prompt == "no":
             add_booking(db_connection, cursor, member_email)
         

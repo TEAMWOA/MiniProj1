@@ -39,7 +39,7 @@ def db_exit(db_connection):
     
     db_connection.commit()
     db_connection.close()
-<<<<<<< HEAD
+# <<<<<<< HEAD
     clear_screen()
     quit()
 def message_member(db_connection, cursor,recipient,sender, message, rno):
@@ -69,8 +69,8 @@ def valid_lcode(lcode):
     if cursor.fetchone():
         valid = True
     return valid
-=======
+# =======
 #     quit()
     time.sleep(1.5) 
     sys.exit()
->>>>>>> 97dc5eb45a155117967714b9e9d918abdde581a3
+# >>>>>>> 97dc5eb45a155117967714b9e9d918abdde581a3

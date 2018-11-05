@@ -1,4 +1,6 @@
-def cancel_booking(db_connection, cursor,member_email):
+from utility import *
+
+def cancel_booking(db_connection, cursor, member_email):
     
     # Retreive all bookings on rides offered by current user and cancel
     # specified booking(s)

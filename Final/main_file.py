@@ -29,8 +29,8 @@ def main():
     print("############ ############# ############")
     time.sleep(2.5)
     
-    path = "./{}".format(sys.argv[1])
-    db_connection = sqlite3.connect(path)
+    # path = "./{}".format(sys.argv[1])
+    db_connection = sqlite3.connect("./testDatabase.db")
     cursor = db_connection.cursor()
     cursor.execute('PRAGMA foreign_keys=ON;')
     db_connection.commit()
