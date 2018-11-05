@@ -140,6 +140,7 @@ def offer_ride(db_connection, cursor, member_email):
 
     enrouteStops = []
 
+    # validates date entered by the user; does not let past dates be selected 
     while trueDate == False:
         now = datetime.now()
         date = input("   {DATE} Enter ride date (ex. YYYY-MM-DD): ")
@@ -176,6 +177,7 @@ def offer_ride(db_connection, cursor, member_email):
                     continue
             trueDate = True
 
+    # checks if number of seats are related to the cno; does not let a member offer 0 seats
     while trueNoSeats == False:
         noSeats = input("   {SEATS} Enter the number of seats: ")
         if noSeats.isdigit():
@@ -187,7 +189,7 @@ def offer_ride(db_connection, cursor, member_email):
         else:
             print("\n*** Incorrect input format. Try again\n***")
             continue
-
+    #enter price per seat
     while truePricePerSeat == False:
         pricePerSeat = input("   {PRICE} Enter a price per seat ($): ")
         if pricePerSeat.isdigit():
@@ -195,7 +197,8 @@ def offer_ride(db_connection, cursor, member_email):
         else:
             print("***\n*** Incorrect input format. Try again\n***")
             continue
-
+            
+    # enter luggage description 
     while trueLuggage == False:
         luggage = input("   {LUGGAGE} Enter a luggage description: ")
         if len(luggage) > 10:
@@ -205,7 +208,8 @@ def offer_ride(db_connection, cursor, member_email):
             print("***\n***You need to enter something for the description. Try again\n***")
             continue
         trueLuggage = True
-
+    
+    #pick up location: add and select
     while trueSRC == False:
         SRCnum = input("\n   {PICKUP} Enter a pickup location: ")
         if len(SRCnum) > 16 or len(SRCnum) == 0:
@@ -248,7 +252,8 @@ def offer_ride(db_connection, cursor, member_email):
             print(
                 "***\n*** Something is MIA. We couldn't find any lcode, city, province or address with that query\n***")
             continue
-
+            
+    # destination location: add and select
     while trueDST == False:
         DSTnum = input("\n   {DROPOFF} Enter a destination location: ")
         if len(DSTnum) > 16 or len(DSTnum) == 0:
@@ -290,7 +295,9 @@ def offer_ride(db_connection, cursor, member_email):
             trueDST = True
         else:
             print("\n*** Something is MIA. We couldn't find any lcode, city, province or address with that query\n***")
-
+    
+    
+    # add enroutes
     while trueEnroutes == False:
         stop = input("\n   {ENROUTE} Enter an enroute location \n < press ENTER to skip > ")
         if len(stop) > 16:
@@ -334,7 +341,8 @@ def offer_ride(db_connection, cursor, member_email):
             print(stopOptions)
         else:
             print("\n*** Something is MIA. We couldn't find any lcode, city, province or address with that query\n***")
-
+   
+    # valid car number
     while trueCar == False:
         cno = input("\n   {CARNUMBER} Enter a car number\n < Press ENTER to skip > ")
         if cno.isdigit():
@@ -355,13 +363,14 @@ def offer_ride(db_connection, cursor, member_email):
             print("***\n*** Something went wrong. Try again\n***")
             continue
 
+        #enter ride into database with all inputted info
         cursor.execute(
             "INSERT INTO rides VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", [rno, pricePerSeat, date, noSeats, luggage, src, dst, driver, cno])
         for item in enrouteStops:
             cursor.execute("INSERT INTO enroute VALUES (?, ?);", [rno, item[0]])
     db_connection.commit()
 
-    print("\n   . . .. . Ride successfully posted!")
+    print("\n   . . .. . Ride successfully posted!") #validation 
     sleep(1.5)
 
     menus.main_menu(db_connection, cursor, member_email)
