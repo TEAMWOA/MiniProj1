@@ -14,7 +14,10 @@ import datetime
 from utility import *
 import menus
 
-
+################################################################
+#
+# 1. Search for Rides
+#
 def ride_search(db_connection, cursor, member_email):
     # Searches for a ride
     # Keyword can match either the location code or substring of the city, province
@@ -118,7 +121,10 @@ def ride_search(db_connection, cursor, member_email):
 
     return True
 
-
+################################################################
+#
+# 2. Offer Ride 
+#
 def offer_ride(db_connection, cursor, member_email):
     clear_screen()
     print("\n")

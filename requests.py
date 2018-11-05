@@ -124,6 +124,8 @@ def deleteRequest(db_connection, row, displayedRequests):
 
     print("> Deleting request.. . .  . . ..")
     sleep(1)
+    print("\n.. . .  . . .. Request deleted")
+    sleep(1.5)
 
     #cursor.execute = ("DELETE FROM requests WHERE rid = '{}'").format(request[0])
     cursor.execute("DELETE FROM requests WHERE rid ==?;",[request[0]] )
