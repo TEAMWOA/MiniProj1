@@ -2,8 +2,7 @@ from utility import *
 
 
 def cancel_booking(db_connection, cursor, member_email):
-
-
+    
     # Retreive all bookings on rides offered by current user and cancel
     # specified booking(s)
     
@@ -62,52 +61,54 @@ def cancel_booking(db_connection, cursor, member_email):
     # ensure it belongs to the user
     bno = prompt
     while not bno.isdigit() or int(bno) not in booking_numbers:
-        booking_to_cancel = input("\nInvalid booking number, try again: ").strip()
+        bno = input("\nInvalid booking number, try again: ").strip()
         
     bno = int(bno)
     
     # get the number of seats that was booked on this ride
-    booking_to_cancel = (bno,)
-    cursor.execute("SELECT seats,email,rno FROM bookings where bno = ?",(booking_to_cancel,))
-    vacant_seats = cursor.fetchone()[0]
-    recipient = cursor.fetchone()[1]
-    rno = cursor.fetchone()[2]
+    cursor.execute("SELECT seats, email, rno FROM bookings where bno = ?",(bno,))
+    ride = cursor.fetchone()
+    vacant_seats = ride[0]
+    recipient = ride[1]
+    rno = ride[2]
     
     
-    print("\nCancelling this booking will free up", vacant_seats, "seats" )
-    print(bookee, "will be notified of the cancellation")
+    print("\nCancelling this booking will free up", vacant_seats, "seat(s).\n" )
+    print(recipient, "will be notified of the cancellation.\n\n")
     prompt = input("Cancel this booking? (yes/no): ")
     if prompt.lower == 'no':
         cancel_booking()
     elif prompt.lower() == 'yes':
         
         # get the number of seats still available and associated ride number
-        cursor.execute("SELECT r.rno, r.seats FROM rides r, bookings b where bno = ? and r.rno = b.rno",(booking_to_cancel,))
+        cursor.execute("SELECT r.rno, r.seats FROM rides r, bookings b where bno = ? and r.rno = b.rno",(bno,))
         ride_info = cursor.fetchall()
         ride_num = ride_info[0][0]
         seats_available = ride_info[0][1]
         
         #Delete the booking for the table
-        cursor.execute("DELETE FROM bookings WHERE bno = ?", (booking_to_cancel,))
+        cursor.execute("DELETE FROM bookings WHERE bno = ?", (bno,))
         
         #Add the open seats back into the table
         seats_left =  int(seats_available) + int(vacant_seats)
         ride_info = (seats_left, ride_num,)
         cursor.execute("UPDATE rides SET seats = ? where rno = ? ",ride_info)
-        print("\nBooking",booking_to_cancel,"has been cancelled")
+        print("\nBooking",bno,"has been cancelled")
         
         #message the member about their booking being cancelled
         sender = member_email
         recipient = recipient
         message = "Your booking on ride" + str(ride_num) + "has been cancelled by the driver"
         rno = rno
-        if message_member(db_connection,recipient, sender, message, rno):
-            print(bookee, "has been notified.")
+        if message_member(db_connection,cursor, recipient, sender, message, rno):
+            print(recipient, "has been notified.")
+        db_connection.commit()
         # ask if they want to cancel another bookings
         prompt = input("\nCancel another booking? (yes/no): ").split()
         if prompt == 'no':
             exit()
         elif prompt == 'yes':
-            cancel_booking()
+            cancel_booking(db_connection,cursor, member_email)
         
     return True
+    
