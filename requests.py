@@ -342,7 +342,6 @@ def messageMember(db_connection, row, member_email, displayedRequests):
     cursor = db_connection.cursor()
     request = displayedRequests[row]
     
-    print('request',request)
     trueRNO = False
     
     #RNO     
@@ -374,11 +373,6 @@ def messageMember(db_connection, row, member_email, displayedRequests):
     timestamp = str(timestamp)[:19]
     print("\n>Type a message to send  ...  . . ... :\n")
     message = input() 
-#     print(poster)
-#     print(timestamp)
-#     print(member_email)
-#     print(message)
-#     print(rid)
 
     # insert inputted message into the table
     cursor.execute(("INSERT INTO inbox VALUES (?, ?, ?, ?, ?, 'n');"),[request[1], timestamp, member_email, message, rno])
