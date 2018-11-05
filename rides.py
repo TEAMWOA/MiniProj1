@@ -52,28 +52,50 @@ def ride_search(db_connection, cursor, member_email):
                     master_list.append(each)
             else:
                 master_list[:] = [each for each in ride_matches if each in master_list]
-
+        
+        # the masterlist contains only matches all keywords
+        # gets fetched as immutable tuples so must be converted into a list
+        # for manipulation
+        
         master_list = list(master_list)
+        
+        # Iterate through the list looking for none types and turn them
+        # into empty strings 
         for each, ride in enumerate(master_list):
+            
+            # gets fetched as immutable tuples so must be converted into a list
+            # for manipulation            
             ride = list(ride)
             master_list[each] = ride
+            
+            # if value is none type then replace with an empty string
             for each, value in enumerate(ride):
                 if value is None:
                     ride[each] = ""
-
+        
+        # boolean to help listing
         stop_list = False
 
         print_logo("Search Rides")
-
+        
+        # print the labels
         print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
-
+        
+        
+        # stop_list is only true if the the input is a ride number or exit
         while stop_list == False:
+            
+            #print matches maximum 5 at a time
             for count, each in enumerate(master_list):
                 print(
                     "\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format(each[0], each[1], each[2], each[3], each[4], each[5], each[6], each[7], each[8], each[9], each[10], each[11], each[12]))
-
+                
+                # if we are at the last ride or the the 5th value, ask for an input
+                
                 if (count == len(master_list) - 1) or (count > 0 and ((count+1) % 5) == 0):
                     prompt = input("\n Enter a ride number or return to see more: ").strip()
+                    
+                      #if the prompt is empty then keep listing
                     if prompt == "":
 
                         print_logo("Search Rides")
@@ -81,13 +103,14 @@ def ride_search(db_connection, cursor, member_email):
                         print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
                         continue
+                    #if the input is a digit then get the email of the driver who is offering the ride from the table
+                    # the user will send a message to the driver
                     elif prompt.isdigit():
                         prompt = int(prompt)
-                        cursor.execute("SELECT driver FROM rides WHERE rno = ?;", [prompt])
+                        cursor.execute("SELECT driver FROM rides WHERE rno = ?;", (prompt,))
                         driver = cursor.fetchone()[0]
                         stop_list == True
                         message = input(" Enter message: ")
-                        # message_member(db_connection, cursor, recipient, sender, message, rno):
                         message_member(db_connection, cursor, driver, member_email, message, int(prompt))
                     elif prompt == 'exit':
                         stop_list == True
