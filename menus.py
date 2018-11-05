@@ -31,14 +31,7 @@ from cancel_booking import *
 def login_menu(db_connection, cursor):
     # First menu user encounters, allows for logging in, registering a new account and exiting
     while True:
-        clear_screen()
-        
-        print("\n")
-        print("    ######################")
-        print("    ####              ####")
-        print("    ### AUTHENTICATION ###")
-        print("    ####              ####")    
-        print("    ######################\n\n")
+        print_logo("Authentication")
         print("> Select a number option from the menu\n< Type EXIT to end the program >\n")
 
         print("   1. Login")
@@ -73,14 +66,7 @@ def login_menu(db_connection, cursor):
 def main_menu(db_connection, cursor, member_email):
     # Main menu
     while True:
-        clear_screen()
-        
-        print("\n")
-        print("    ##################")
-        print("    ####          ####")
-        print("    ### MAIN  MENU ###")
-        print("    ####          ####")    
-        print("    ##################\n\n")
+        print_logo("Main Menu")
     
         print("\n> Select a number option from the menu")
         print("< Type EXIT to end the program >\n")
@@ -170,13 +156,8 @@ def main_menu(db_connection, cursor, member_email):
 def inbox(db_connection, cursor, member_email):
     # Displays the user's unread messages
     while(1):
-        clear_screen()
-        print("\n")
-        print("    ###################")
-        print("    ####           ####")
-        print("    ###    INBOX    ###")
-        print("    ####           ####")    
-        print("    ###################\n\n")
+        print_logo("Inbox")
+
         print("< Type EXIT to end the program or BACK/press ENTER to go back to the Main Menu >\n")
     
         print("   1. Unread Messages")
@@ -248,13 +229,7 @@ def inbox(db_connection, cursor, member_email):
 #
 def login(db_connection, cursor):
     # Gets email / password from user, verifies it
-    clear_screen()
-    print("\n")
-    print("    ##################")
-    print("    ####          ####")
-    print("    ###   LOG IN   ###")
-    print("    ####          ####")    
-    print("    ##################\n\n")
+    print_logo("Login")
     print(">Enter email & password: ")
     print("< Type EXIT to end the program or BACK/press ENTER to go back to the Login/Signup Menu >\n")
     
@@ -268,16 +243,15 @@ def login(db_connection, cursor):
             db_exit(db_connection)
             
         if email.upper() == "BACK" or email == "":
-            #return #maybe wrong....... # GOES BACK TO THE MAIN AUTHENTICATION MENU  (before print statements)
             login_menu(db_connection, cursor)
-            
+
+
         cursor.execute("SELECT email FROM members WHERE email=? COLLATE NOCASE;", [email])
-        row = cursor.fetchone()
-        if len(row) == 1 and email != "email":
+        try:
+            row = cursor.fetchone()
             email = row[0]
             trueEmail = True
-            
-        if trueEmail == False:
+        except:
             print("\n***\n*** No account is registered under that email. Try another\n***")
             
     while truePassword == False: # loops until a proper password (that matches the email) is entered
@@ -298,18 +272,14 @@ def login(db_connection, cursor):
 #
 # (5) REGISTER MEMBER
 #
+
 def register(db_connection, cursor):
     # Gets email, name, phone, password from user
     # If no account registered under that email, creates entry in members table
     # User can return to the login menu by pressing enter at any time
-   
-    clear_screen()
-    print("\n")
-    print("    ##################")
-    print("    ####          ####")
-    print("    ###  REGISTER  ###")
-    print("    ####          ####")    
-    print("    ##################\n\n> Enter your information below <")
+
+    print_logo("Register")
+    print("> Enter your information below <")
     print("< Type EXIT to end the program or BACK/press ENTER to go back to the Login/Signup Menu >\n")
 
     emailIsFree = False

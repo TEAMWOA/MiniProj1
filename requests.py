@@ -24,14 +24,7 @@ def post_ride_request(db_connection, cursor, member_email):
     # The request id is set to a unique number automatically
     # Can return by pressing enter at any time (except for when entering amount)
 
-    clear_screen()
-
-    print("\n")
-    print("    ##########################")
-    print("    ####                  ####")
-    print("    ### Post Ride Requests ###")
-    print("    ####                  ####")    
-    print("    ##########################\n\n")
+    print_logo("Post Ride Requests")
 
     # Generate request id
     try:
@@ -44,12 +37,12 @@ def post_ride_request(db_connection, cursor, member_email):
     # Date must match format YYYY-MM-DD and be in the future
     date = input("  Date (YYYY-MM-DD): ")
     if len(date) == 0:
-        return
+        menus.main_menu(db_connection, cursor, member_email)
     while not will_validate_date(date):
         print("  Please enter a valid date.")
         date = input("  Date (YYYY-MM-DD): ")
         if len(date) == 0:
-            return
+            menus.main_menu(db_connection, cursor, member_email)
 
     # Get list of location codes
     location_codes = []
@@ -103,6 +96,8 @@ def post_ride_request(db_connection, cursor, member_email):
 # 2. Delete Ride Requests
 #
 def deleteRequest(db_connection, row, displayedRequests):
+
+    print_logo("Delete Ride Request")
     #deletes a row in the request table 
 
     cursor = db_connection.cursor()
@@ -211,13 +206,7 @@ def searchRideRequests(db_connection, cursor, member_email):
 
 def searchAndDeleteRequest(db_connection, cursor, member_email):    
     while(1):
-        clear_screen()
-        print("\n")
-        print("    ############################")
-        print("    ####                    ####")
-        print("    ### Search&DeleteRequest ###")
-        print("    ####                    ####")    
-        print("    ############################\n\n")
+        print_logo("Search & Delete Ride Requests")
         print("< Type EXIT to end the program or BACK/press ENTER to go back to the Main Menu >\n")
         print("   1. View/delete ride requests\n   2. Search for requests by lcode or city *and* message other member\n")
         print

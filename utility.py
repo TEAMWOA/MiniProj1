@@ -33,13 +33,7 @@ def clear_screen():
 
 def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
-    clear_screen()
-    print('\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
-    print("    ###################")
-    print("    ####           ####")
-    print("    ##  SeeYouAgain  ##")
-    print("    ####           ####")    
-    print("    ###################\n")
+    print_logo("See you again!")
     print('\n    . . . .... .... ..\n                ... . ..... .. .. ') 
     sleep(2)
     
@@ -49,6 +43,24 @@ def db_exit(db_connection):
     quit()
 
 
+# Prints a logo containing the specifiec string at the top of the console
+def print_logo(string_to_print):
+    width = len(string_to_print) + 14
+    str1 = "  " + ("#" * width)
+    str2 = "  " + ("#" * 4) + (" " * (width - 8)) + ("#" * 4)
+    str3 = "  " + ("#" * 4) + (" " * 3) + string_to_print + (" " * 3) + ("#" * 4)
+    clear_screen()
+    print("\n")
+    print(str1)
+    print(str2)
+    print(str3)
+    print(str2)
+    print(str1)
+    print("\n")
+    return
+
+
+# Sends a message to a member
 def message_member(db_connection, cursor, recipient, sender, message, rno):
     new_message = (recipient, sender, message, rno)
     
@@ -59,6 +71,7 @@ def message_member(db_connection, cursor, recipient, sender, message, rno):
     return True
 
 
+# Checks whether the given member is valid
 def valid_user(member_to_book,cursor):
     valid_user = False
     user = (member_to_book,)
@@ -69,6 +82,7 @@ def valid_user(member_to_book,cursor):
     return valid_user
 
 
+# Validates the given lcode
 def valid_lcode(lcode,cursor):
     valid = False
     location = (lcode,)

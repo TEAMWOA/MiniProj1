@@ -20,14 +20,8 @@ def ride_search(db_connection, cursor, member_email):
     # Keyword can match either the location code or substring of the city, province
     # or the address fields of the location
     # display all ride details and car details
-    clear_screen()
 
-    print("\n")
-    print("    ##########################")
-    print("    ####                  ####")
-    print("    ###    Search Rides    ###")
-    print("    ####                  ####")
-    print("    ##########################\n\n")
+    print_logo("Search Rides")
 
     # recieve input from user and split using blankspace
     prompt = input("\nEnter keywords or 'exit': ")
@@ -69,13 +63,7 @@ def ride_search(db_connection, cursor, member_email):
 
         stop_list = False
 
-        clear_screen()
-        print("\n")
-        print("    ##########################")
-        print("    ####                  ####")
-        print("    ###    Search Rides    ###")
-        print("    ####                  ####")
-        print("    ##########################\n")
+        print_logo("Search Rides")
 
         print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
@@ -88,13 +76,7 @@ def ride_search(db_connection, cursor, member_email):
                     prompt = input("\n Enter a ride number or return to see more: ").strip()
                     if prompt == "":
 
-                        clear_screen()
-                        print("\n")
-                        print("    ##########################")
-                        print("    ####                  ####")
-                        print("    ###    Search Rides    ###")
-                        print("    ####                  ####")
-                        print("    ##########################\n")
+                        print_logo("Search Rides")
 
                         print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
@@ -118,13 +100,7 @@ def ride_search(db_connection, cursor, member_email):
 # 2. Offer Ride 
 #
 def offer_ride(db_connection, cursor, member_email):
-    clear_screen()
-    print("\n")
-    print("    ##################")
-    print("    ####          ####")
-    print("    ### Offer Ride ###")
-    print("    ####          ####")
-    print("    ##################\n")
+    print_logo("Offer Ride")
 
     driver = str(member_email)
     cursor.execute("SELECT MAX(rno) FROM rides")
