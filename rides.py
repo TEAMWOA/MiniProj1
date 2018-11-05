@@ -14,112 +14,78 @@ import datetime
 from utility import *
 import menus
 
-################################################################
-#
-# 1. Search for Rides
-#
+
 def ride_search(db_connection, cursor, member_email):
     # Searches for a ride
     # Keyword can match either the location code or substring of the city, province
     # or the address fields of the location
     # display all ride details and car details
 
-    clear_screen()
-
-    print("\n")
-    print("    ###################")
-    print("    ####           ####")
-    print("    ### Ride Search ###")
-    print("    ####           ####")
-    print("    ###################\n\n")
-    print("\n> Enter up to 3 keywords:")
-    print("< Type EXIT to end the program or press ENTER/type BACK to go back to the Main Menu. >\n")
-
     # recieve input from user and split using blankspace
-    prompt = input().split()
-    print("PROMPT:", prompt)
-    if prompt[0].upper() == "EXIT":
-        db_exit(db_connection)  # quits program
-        return False
-
-    if prompt[0].upper() == "BACK" or prompt == "":
+    prompt = input("\nEnter keywords or 'exit': ")
+    if prompt.lower() == "exit":
         menus.main_menu(db_connection, cursor, member_email)
-
     else:
         # for each keyword given, make a sequence ins SQLite
-        for each in prompt:
-            print("\n> You searched...")
-            keyword = "%" + each + "%"
-            print(keyword)
+        match_list = []
+        master_list = []
+        for keyword in prompt.split(" "):
+            print("KEYWORD:")
+            keyword = "%" + keyword + "%"
 
             # a list of sequences for each possible match
 
-            keyword = (
-            keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword)
+            keywords = [keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword]
 
             # execute query for each keyword
-
             cursor.execute(
-                "SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno, c.cno, c.make, c.model, c.seats, c.owner FROM rides AS r LEFT OUTER JOIN enroute e on r.rno = e.rno LEFT OUTER JOIN locations l1 on r.src = l1.lcode LEFT OUTER JOIN locations l2 on r.dst = l2.lcode LEFT OUTER JOIN cars c on r.cno = c.cno WHERE r.src LIKE ? or r.dst LIKE ? or e.lcode LIKE ? or l1.lcode LIKE ? or l1.city LIKE ? or l1.prov LIKE ? or l1.address LIKE ? or l2.lcode LIKE ? or l2.city LIKE ? or l2.prov LIKE ? or l2.address LIKE ? GROUP BY r.rno;",
-                keyword)
+                "SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno, c.make, c.model, c.year, c.seats FROM rides AS r LEFT OUTER JOIN enroute e on r.rno = e.rno LEFT OUTER JOIN locations l1 on r.src = l1.lcode LEFT OUTER JOIN locations l2 on r.dst = l2.lcode LEFT OUTER JOIN cars c on r.cno = c.cno WHERE r.src LIKE ? COLLATE NOCASE or r.dst LIKE ? COLLATE NOCASE or e.lcode LIKE ? COLLATE NOCASE or l1.lcode LIKE ? COLLATE NOCASE or l1.city LIKE ? COLLATE NOCASE or l1.prov LIKE ? COLLATE NOCASE or l1.address LIKE ? COLLATE NOCASE or l2.lcode LIKE ? COLLATE NOCASE or l2.city LIKE ? COLLATE NOCASE or l2.prov LIKE ? COLLATE NOCASE or l2.address LIKE ? COLLATE NOCASE GROUP BY r.rno;",
+                keywords)
 
             # fetch all the matches for each keyword
             ride_matches = cursor.fetchall()
 
-            # if there is none, provide message and ask again
-            if not ride_matches:
-                print("\n***\n*** No matches found for < {} >. Try again\n*** ".format(prompt))
-                # print("\nNo Matches")
-                ride_search(cursor)
-
-            # if there are matches, list them 5 at a time
+            if len(master_list) == 0:
+                for each in ride_matches:
+                    master_list.append(each)
             else:
-                print("\n")
-                limit = 5
-                i = 0
-                j = 0
-                num_matches = len(ride_matches)
-                num_columns = len(ride_matches[0])
-                while i < (num_matches - 1):
+                master_list[:] = [each for each in ride_matches if each in master_list]
 
-                    # If we've shown all results provide a message
-                    # go back to main menu
+        master_list = list(master_list)
+        for each, ride in enumerate(master_list):
+            ride = list(ride)
+            master_list[each] = ride
+            for each, value in enumerate(ride):
+                if value is None:
+                    ride[each] = ""
 
-                    if i == (num_matches - 1):
-                        print("\n***\n*** No more results were found\n*** ")
-                        break
-                    elif j == (num_columns - 1):
-                        break
-                    else:
+        stop_list = False
+        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
-                        # print the first 5 results
-                        while j < limit and prompt[0].upper() != "EXIT":
-                            try:
-                                print(*ride_matches[j])
-                                j += 1
-                                i += 1
-                            except IndexError:
-                                print("\n***\n*** No more results were found\n*** ")
-                                return False
+        while stop_list == False:
+            for count, each in enumerate(master_list):
+                print(
+                    "\n{:^5}{:^5}{:^10}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format(each[0], each[1], each[2], each[3], each[4], each[5], each[6], each[7], each[8], each[9], each[10], each[11], each[12]))
 
-                        # if there are more results, ask the user
-                        # if they want to see more or exit the list
-                        print("< Press ENTER to see more results or type EXIT to end the program. >\n")
-                        prompt = input()
+                if (count == len(master_list) - 1) or (count > 0 and ((count+1) % 5) == 0):
+                    prompt = input("\nEnter a ride number or return to see more: ").strip()
+                    if prompt == "":
+                        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
-                        # if they press enter to see more
-                        # increase the limit and list the next 5
-                        # matches until all matches are listed
-
-                        if len(prompt) == 0:
-                            limit += 5
-                            print("\n")
-
-                        # if they exit the list, return to search prompt
-                        elif prompt[0].upper() == "EXIT":
-                            db_exit(db_connection)
-
+                        continue
+                    elif prompt.isdigit():
+                        prompt = int(prompt)
+                        cursor.execute("SELECT driver FROM rides WHERE rno = ?;", [prompt])
+                        driver = cursor.fetchone()[0]
+                        stop_list == True
+                        message = input("Enter message: ")
+                        # message_member(db_connection, cursor, recipient, sender, message, rno):
+                        message_member(db_connection, cursor, driver, member_email, message, int(prompt))
+                    elif prompt == 'exit':
+                        stop_list == True
+                        menus.main_menu(db_connection, cursor, member_email)
     return True
+
 
 ################################################################
 #
