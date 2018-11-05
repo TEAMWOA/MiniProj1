@@ -11,7 +11,6 @@ def add_booking(db_connection, cursor, member_email):
     
     user = (member_email,)
     ride_numbers = []
-    
     # retrieve all FUTURE rides offered by the user
     cursor.execute("SELECT distinct r.rno, r.price, r.rdate, r.seats, r.lugDesc,r.src, r.dst, r.driver, r.cno FROM rides r WHERE driver = ? and rdate > date('now')", user)
     
@@ -89,7 +88,7 @@ def add_booking(db_connection, cursor, member_email):
     # if it is full, return a message asking to proceed
     if seats_available == 0:
         proceed = ("\nThis ride is full! Proceed?\n(yes/no)").strip()
-        while prompt != 'no' or prompt!= 'yes':
+        while proceed != 'no' or proceed!= 'yes':
             proceed= input("\nPlease enter yes or no: ").strip()        
         if proceed.lower() == 'no':
             add_booking(db_connection,cursor,member_email)
@@ -105,7 +104,8 @@ def add_booking(db_connection, cursor, member_email):
         
         #to check for a valid user
         member_to_book = input("\nEnter member's email to book: ").strip()
-        while not valid_user(member_to_book):
+        cursor = db_connection.cursor()
+        while not valid_user(member_to_book, cursor):
             member_to_book = input("\nInvalid Email, Enter another email: ").strip()
         
         #Get how many seats to book for the member
@@ -138,12 +138,12 @@ def add_booking(db_connection, cursor, member_email):
         
         #recieve the pickup code, then check for validity
         pickup = input("\nEnter the pickup location code: ").strip()
-        while not valid_lcode(pickup):
+        while not valid_lcode(pickup,cursor):
             pickup = input("\nInvalid location code, try again: ").strip()
         
         # Recieve the dropff code, then check for validity
         dropoff = input("\nEnter the dropoff location code: ").strip()
-        while not valid_lcode(dropoff):
+        while not valid_lcode(dropoff,cursor):
             dropoff = input("\nInvalid location code, try again: ").strip()
         
         #The list of the new booking info    
