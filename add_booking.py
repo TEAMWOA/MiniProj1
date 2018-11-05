@@ -22,7 +22,7 @@ def add_booking(db_connection, cursor, member_email):
     if not ride_matches:
         prompt = input("\nYou Have Not Offered Any Rides\nDo You Want To Offer A Ride?\nYes/No: ").strip()
         if prompt.strip() == 'yes':
-            offer_ride()
+            offer_ride(db_connection, cursor, member_email)
         elif prompt.strip() == 'no':
             return False
     
