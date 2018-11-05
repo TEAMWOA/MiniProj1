@@ -1,15 +1,19 @@
 # Utility functions for the program
-# (1) validate_date(date)
-# (2) clear_screen()
-# (3) db_exit()
 #
+# 1. validate_date(date)
+# 2. clear_screen()
+# 3. db_exit(db_connection)
+# 4. message_member(db_connection, cursor, recipient, sender, message, rno)
+# 5. valid_user(member_to_book)
+# 6. valid_lcode(lcode)
 #
+
 import os
 from time import sleep
 from datetime import datetime, timedelta
 import sys
 
-
+################################################################
 def validate_date(date):
     now = datetime.datetime.now()
     todaysDATE = now.strftime("%Y-%m-%d")
@@ -18,12 +22,14 @@ def validate_date(date):
     else:
         return False
 
-
+################################################################
 def clear_screen():
     # Function to clear the screen - less clutter
     os.system("clear")
 
 
+
+################################################################
 def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
     clear_screen()
@@ -41,7 +47,7 @@ def db_exit(db_connection):
     clear_screen()
     quit()
 
-
+################################################################
 def message_member(db_connection, cursor, recipient, sender, message, rno):
     new_message = (recipient, sender, message, rno)
     
@@ -51,7 +57,7 @@ def message_member(db_connection, cursor, recipient, sender, message, rno):
     
     return True
 
-
+################################################################
 def valid_user(member_to_book):
     valid_user = False
     user = (member_to_book,)
@@ -61,7 +67,7 @@ def valid_user(member_to_book):
         
     return valid_user
 
-
+################################################################
 def valid_lcode(lcode):
     valid = False
     location = (lcode,)

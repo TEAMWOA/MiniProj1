@@ -1,7 +1,8 @@
 # Rides
 #
-# (1) ride_search(db_connection, cursor, member_email)
-# (2) offer_ride(db_connection, cursor, member_email)
+# 1. ride_search(db_connection, cursor, member_email)
+# 2. offer_ride(db_connection, cursor, member_email)
+#
 
 import sqlite3  # sql module
 import os

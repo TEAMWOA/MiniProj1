@@ -1,10 +1,10 @@
 # Menus
-
-# (1) login_menu(db_connection, cursor)
-# (2) main_menu(db_connection, cursor, member_email)
-# (3) inbox(db_connection, cursor, member_email)
-# (4) login(db_connection, cursor)
-# (5) register(db_connection, cursor)
+#
+# 1. login_menu(db_connection, cursor)
+# 2. main_menu(db_connection, cursor, member_email)
+# 3. inbox(db_connection, cursor, member_email)
+# 4. login(db_connection, cursor)
+# 5. register(db_connection, cursor)
 #
 #
 #
