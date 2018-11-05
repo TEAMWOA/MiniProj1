@@ -1,5 +1,6 @@
 from utility import *
-
+import menus
+from add_booking import add_booking
 
 def cancel_booking(db_connection, cursor, member_email):
     
@@ -19,9 +20,9 @@ def cancel_booking(db_connection, cursor, member_email):
     if not bookings:
         prompt = input("\nYou Have no rides booked. Would you like to add a booking?\nYes/No: ").strip()
         if prompt == 'yes':
-            add_booking()
+            add_booking(db_connection, cursor, member_email)
         elif prompt == 'no':
-            logged_in_loop()
+            menus.main_menu(db_connection, cursor, member_email)
     
     # Print all the bookings 
     # make a list of booking numbers for easier reference
@@ -52,7 +53,7 @@ def cancel_booking(db_connection, cursor, member_email):
                         continue
                     elif prompt == 'exit':
                         stop_list = True
-                        exit()
+                        menus.main_menu(db_connection, cursor, member_email)
                     elif prompt.isdigit():
                         stop_list = True
                         break                
@@ -77,7 +78,7 @@ def cancel_booking(db_connection, cursor, member_email):
     print(recipient, "will be notified of the cancellation.\n\n")
     prompt = input("Cancel this booking? (yes/no): ")
     if prompt.lower == 'no':
-        cancel_booking()
+        cancel_booking(db_connection, cursor, member_email)
     elif prompt.lower() == 'yes':
         
         # get the number of seats still available and associated ride number
@@ -104,11 +105,11 @@ def cancel_booking(db_connection, cursor, member_email):
             print(recipient, "has been notified.")
         db_connection.commit()
         # ask if they want to cancel another bookings
-        prompt = input("\nCancel another booking? (yes/no): ").split()
+        prompt = input("\nCancel another booking? (yes/no): ").lower()
         if prompt == 'no':
-            exit()
+            menus.main_menu(db_connection, cursor, member_email)
         elif prompt == 'yes':
             cancel_booking(db_connection,cursor, member_email)
-        
-    return True
-    
+
+    menus.main_menu(db_connection, cursor, member_email)
+
