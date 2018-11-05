@@ -20,6 +20,14 @@ def ride_search(db_connection, cursor, member_email):
     # Keyword can match either the location code or substring of the city, province
     # or the address fields of the location
     # display all ride details and car details
+    clear_screen()
+
+    print("\n")
+    print("    ##########################")
+    print("    ####                  ####")
+    print("    ###    Search Rides    ###")
+    print("    ####                  ####")
+    print("    ##########################\n\n")
 
     # recieve input from user and split using blankspace
     prompt = input("\nEnter keywords or 'exit': ")
@@ -30,7 +38,7 @@ def ride_search(db_connection, cursor, member_email):
         match_list = []
         master_list = []
         for keyword in prompt.split(" "):
-            print("KEYWORD:")
+            print("KEYWORD:" + keyword)
             keyword = "%" + keyword + "%"
 
             # a list of sequences for each possible match
@@ -60,17 +68,35 @@ def ride_search(db_connection, cursor, member_email):
                     ride[each] = ""
 
         stop_list = False
-        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
+
+        clear_screen()
+        print("\n")
+        print("    ##########################")
+        print("    ####                  ####")
+        print("    ###    Search Rides    ###")
+        print("    ####                  ####")
+        print("    ##########################\n")
+
+        print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
         while stop_list == False:
             for count, each in enumerate(master_list):
                 print(
-                    "\n{:^5}{:^5}{:^10}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format(each[0], each[1], each[2], each[3], each[4], each[5], each[6], each[7], each[8], each[9], each[10], each[11], each[12]))
+                    "\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format(each[0], each[1], each[2], each[3], each[4], each[5], each[6], each[7], each[8], each[9], each[10], each[11], each[12]))
 
                 if (count == len(master_list) - 1) or (count > 0 and ((count+1) % 5) == 0):
-                    prompt = input("\nEnter a ride number or return to see more: ").strip()
+                    prompt = input("\n Enter a ride number or return to see more: ").strip()
                     if prompt == "":
-                        print("\n{:^5}{:^5}{:^12}{:^5}{:^15}{:^6}{:^6}{:^20}{:^3}{:^10}{:^10}{:^4}{:^10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
+
+                        clear_screen()
+                        print("\n")
+                        print("    ##########################")
+                        print("    ####                  ####")
+                        print("    ###    Search Rides    ###")
+                        print("    ####                  ####")
+                        print("    ##########################\n")
+
+                        print("\n {:<5}{:<7}{:<12}{:<7}{:<15}{:<6}{:<6}{:<20}{:<5}{:<12}{:<10}{:<6}{:<10}".format("rno", "price", "date", "seats", "LugDesc", "src", "dst", "driver", "cno", "make", "model", "year", "seats"))
 
                         continue
                     elif prompt.isdigit():
@@ -78,7 +104,7 @@ def ride_search(db_connection, cursor, member_email):
                         cursor.execute("SELECT driver FROM rides WHERE rno = ?;", [prompt])
                         driver = cursor.fetchone()[0]
                         stop_list == True
-                        message = input("Enter message: ")
+                        message = input(" Enter message: ")
                         # message_member(db_connection, cursor, recipient, sender, message, rno):
                         message_member(db_connection, cursor, driver, member_email, message, int(prompt))
                     elif prompt == 'exit':
