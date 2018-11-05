@@ -57,35 +57,30 @@ def login_menu(db_connection, cursor):
 
 def main_menu(db_connection, cursor, member_email):
     # Main menu
-    while True:
-        clear_screen()
-        
-        print("\n")
-        print("    ##################")
-        print("    ####          ####")
-        print("    ### MAIN  MENU ###")
-        print("    ####          ####")    
-        print("    ##################\n\n")
-        print("> Select a number option from the menu <\n")
-    
-        print("\n> Select a number option from the menu\n< Type EXIT to end the program >\n")
-        # print("R I D E S ")
-        print("1. Search for Rides")
-        print("2. Post Ride Request")
-        print("3. (UNIMPLEMENTED) Offer Ride")
-        #print("R E Q U E S T S")
-        print("4. (UNIMPLEMENTED) Search for Ride Requests")
-        print("5. (UNIMPLEMENTED) Delete Ride Requests")
-        print("6. Cancel Ride Booking")
-        print("7. Book Member on a Ride")
-        print("8. Inbox")
-        print("9. Logout")
-        print("10. Exit")
+    clear_screen()
 
-        # Validate input
+    print("\n")
+    print("    ##################")
+    print("    ####          ####")
+    print("    ### MAIN  MENU ###")
+    print("    ####          ####")
+    print("    ##################\n\n")
+    print("> Select a number option from the menu <\n")
+
+    print("\n> Select a number option from the menu\n< Type EXIT to end the program >\n")
+    print("1. Search for Rides")
+    print("2. Post Ride Request")
+    print("3. Offer Ride")
+    print("4. (UNIMPLEMENTED) Search for Ride Requests")
+    print("5. (UNIMPLEMENTED) Delete Ride Requests")
+    print("6. (NOT WORKING) Cancel Ride Booking")
+    print("7. (NOT WORKING) Book Member on a Ride")
+    print("8. Inbox")
+    print("9. Logout")
+    print("10. Exit")
+
+    while True:
         choice = input()
-        while choice not in ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "EXIT"):
-            choice = input()
 
         if choice == "1":
             ride_search(cursor)
@@ -94,8 +89,7 @@ def main_menu(db_connection, cursor, member_email):
             post_ride_request(db_connection, cursor, member_email)
 
         elif choice == "3":
-            # offer_ride()
-            pass
+            offer_ride(db_connection, cursor, member_email)
 
         elif choice == "4":
             # request_search()
@@ -112,11 +106,11 @@ def main_menu(db_connection, cursor, member_email):
             add_booking(db_connection, cursor, member_email)
 
         elif choice == "8":
-            check_inbox(db_connection, cursor, member_email)
+            inbox(db_connection, cursor, member_email)
 
         elif choice == "9":
             clear_screen()
-            print("\n\n\n\n############ ############# ############")
+            print("\n\n############ ############# ############")
             print("############ #############")
             print("############")
             print("L O G G I N G   O U T . . . .... .. ............")
@@ -138,9 +132,10 @@ def main_menu(db_connection, cursor, member_email):
             clear_screen()
             print("\n\n*** < {} > is not a menu option. Try again\n*** ".format(choice)) #will show the user what they inputted wrong
 
+
 def inbox(db_connection, cursor, member_email):
     # Displays the user's unread messages
-    # clear_screen()
+    clear_screen()
 
     print("\n")
     print("    #######################")
@@ -170,11 +165,8 @@ def inbox(db_connection, cursor, member_email):
             main_menu(db_connection, cursor, member_email)
 
         elif choice == "4":
-            login_menu(db_connection, cursor)
-
-        elif choice == "5":
             clear_screen()
-            print("\n\n\n\n############ ############# ############")
+            print("\n\n############ ############# ############")
             print("############ #############")
             print("############")
             print("L O G G I N G   O U T . . . .... .. ............")
@@ -183,10 +175,9 @@ def inbox(db_connection, cursor, member_email):
             print("############ #############")
             print("############ ############# ############")
             time.sleep(1.5)
-            clear_screen()
-            db_exit(db_connection)
+            login_menu(db_connection, cursor)
 
-        elif choice.upper() == "EXIT":
+        elif choice == "5" or choice.upper() == "EXIT":
             db_exit(db_connection)
 
         else:
@@ -196,7 +187,7 @@ def inbox(db_connection, cursor, member_email):
 
 
 def show_messages(db_connection, cursor, member_email, unread_only):
-    # clear_screen()
+    clear_screen()
 
     print("\n")
     print("    #######################")
@@ -210,22 +201,25 @@ def show_messages(db_connection, cursor, member_email, unread_only):
     cursor.execute("SELECT * FROM inbox WHERE email = ? COLLATE NOCASE;", [member_email])
     for row in cursor:
         email, timestamp, sender, content, rno, seen = row
-        if not (seen == 'n' and unread_only):
+        if not (seen == 'y' and unread_only):
             messages.append([timestamp, sender, content, rno])
 
     # Prints all unread messages
-    if len(messages) > 0:
+    if len(messages) == 0:
+        if unread_only:
+            print("No unread messages.")
+        else:
+            print("No messages.")
+
+    else:
         for message in messages:
             print("{:<15}      {:>19}".format(message[1], message[0]))
             print("Regarding ride #{}".format(message[3]))
             print(message[2])
             print()
 
-            cursor.execute("UPDATE inbox SET seen = y WHERE email = ? COLLATE NOCASE;", [member_email])
-            db_connection.commit()
+        cursor.execute("UPDATE inbox SET seen = 'y' WHERE email = ? COLLATE NOCASE;", [member_email])
+        db_connection.commit()
 
-        input("Press enter to return to inbox.")
-        inbox(db_connection, cursor, member_email)
-    else:  # No unread messages - continue straight to main menu
-        inbox(db_connection, cursor, member_email)
-
+    input("Press enter to return to inbox.")
+    inbox(db_connection, cursor, member_email)

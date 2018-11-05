@@ -19,7 +19,7 @@ def main():
         exit()
     
     clear_screen()    
-    print("\n\n\n\n############ ############# ############")
+    print("\n\n############ ############# ############")
     print("############ #############")
     print("############")
     print("L O A D I N G. . . . .... .. ....  ...... ..")
@@ -29,8 +29,9 @@ def main():
     print("############ ############# ############")
     time.sleep(2.5)
     
-    # path = "./{}".format(sys.argv[1])
-    db_connection = sqlite3.connect("./testDatabase.db")
+    path = "./{}".format(sys.argv[1])
+    db_connection = sqlite3.connect(path)
+    # db_connection = sqlite3.connect("./testDatabase.db")
     cursor = db_connection.cursor()
     cursor.execute('PRAGMA foreign_keys=ON;')
     db_connection.commit()
@@ -38,10 +39,10 @@ def main():
     # Start user at login menu
     login_menu(db_connection, cursor)
     
-    #commit and close database
+    # commit and close database
     db_connection.commit()
     db_connection.close()
-    #exit with print messages
+    # exit with print messages
     db_exit()
 
 

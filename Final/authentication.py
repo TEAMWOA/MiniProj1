@@ -5,9 +5,8 @@
 #
 
 import getpass
-
-from time import sleep
 import menus
+from time import sleep
 from utility import *
 
 
@@ -30,132 +29,77 @@ def register(db_connection, cursor):
     truePhone = False
     truePWD = False
     
-    while emailIsFree == False:
+    while not emailIsFree:
         email = input("  Email: ")
-        if(email.upper() == "EXIT"):
-            exit()
-        if(email.upper() == "BACK"):
-            loginMenu()
-        if len(email)>15:
+        if email.upper() == "EXIT":
+            db_exit(db_connection)
+        if email.upper() == "BACK":
+            menus.login_menu(db_connection, cursor)
+        if len(email) > 15:
             print("***\n*** Entered email too long (15 character Limit). Try again \n***")
             continue
-        elif len(email)==0:
+        elif len(email) == 0:
             continue
             
-        cursor.execute("SELECT email FROM members WHERE email = \""+email +"\"") #check if the email is in the members table
+        cursor.execute("SELECT email FROM members WHERE email = ?;", [email]) #check if the email is in the members table
         allEmails = cursor.fetchall()
         
-        if len(allEmails)==0:
+        if len(allEmails) == 0:
             emailIsFree = True
-        if emailIsFree == False:
+        if not emailIsFree:
             print("***\n*** An account exists with that email. Try another\n***")
 
-    while trueName == False:
+    while not trueName:
         name = input("  Name: ")
-        if(name.upper() == "EXIT"):
-            exit()
-        if(name.upper() == "BACK"):
-            loginMenu()
-        if len(name)>20:
+        if name.upper() == "EXIT":
+            db_exit(db_connection)
+        if name.upper() == "BACK":
+            menus.login_menu(db_connection, cursor)
+        if len(name) > 20:
             print("***\n*** Entered name is too long (20 character limit). Try again\n***")
             continue
-        elif len(name)==0:
+        elif len(name) == 0:
             continue
         else:
             trueName = True
 
-    while truePhone == False:
+    while not truePhone:
         phone = input("  Phone (xxx-xxx-xxxx): ")
-        if(phone.upper() == "EXIT"):
+        if phone.upper() == "EXIT":
             exit()
-        if(phone.upper() == "BACK"):
-            loginMenu()
-        if len(phone)>12:
-            print("***\n*** Entered phone number is too long. Try again (ex. xxx-xxx-xxxx)\n***")
+        if phone.upper() == "BACK":
+            menus.login_menu(db_connection, cursor)
+        if len(phone) > 12:
+            print("***\n*** Entered phone number is too long. Try again (xxx-xxx-xxxx)\n***")
             continue
-        if len(phone)<12:
-            print("***\n*** Entered phone number is too short or in the wrong format. Try again (ex. xxx-xxx-xxxx)\n***")
+        if len(phone) < 12:
+            print("***\n*** Entered phone number is too short or in the wrong format. Try again (xxx-xxx-xxxx)\n***")
             continue
-        elif len(phone)==0:
+        elif len(phone) == 0:
             continue
         else:
             truePhone = True
 
-    while truePWD == False:
+    while not truePWD:
         password = getpass.getpass("  Password (6 character limit): ")
-        if(password.upper() == "EXIT"):
-            exit()
-        if(password.upper() == "BACK"):
-            loginMenu()
-        if len(password)>6:
+        if password.upper() == "EXIT":
+            db_exit(db_connection)
+        if password.upper() == "BACK":
+            menus.login_menu(db_connection, cursor)
+        if len(password) > 6:
             print("***\n*** Password is too long. Try again (6 character limit)\n***")
             continue
-        elif len(password)==0:
+        elif len(password) == 0:
             continue
         else:
             truePWD = True
 
-    cursor.execute("INSERT INTO members VALUES (\""+email+"\",\""+name+"\",\""+phone+"\",\""+password+"\")")
+    cursor.execute(
+        "INSERT INTO members VALUES (?, ?, ?, ?);", [email, name, phone, password])
     db_connection.commit()
-    print("***\n*** You're now successfully registered!\n***")
+    print("\n***\n*** You're now successfully registered!\n***")
     sleep(2)
-    
     menus.main_menu(db_connection, cursor, email)
-    db_exit(db_connection)
-
-#     clear_screen()
-#     while True:
-# 
-#         print("\n")
-#         print("    ##################")
-#         print("    ####          ####")
-#         print("    ###  REGISTER  ###")
-#         print("    ####          ####")    
-#         print("    ##################\n\n> Enter your information below <")
-#         print(">   *FYI*  EXIT to exit, BACK to go to Login Menu <\n")
-#         
-#         # Validate email
-#         email = input("Enter email (15 Character Limit) or press enter to return: ").lower()
-#         while len(email) > 15:
-#             email = input("Enter email (15 Character Limit) or press enter to return: ").lower()
-#         if len(email) == 0:
-#             return
-# 
-#         # Make sure no account exists registered to that email
-#         cursor.execute("SELECT * FROM members WHERE email=? COLLATE NOCASE;", [email])
-#         if len(cursor.fetchall()) != 0:  # If len != 0 then an account is already registered under that email
-#             print("\nAccount already registered with that email.\n")
-# 
-#         # Email is valid
-#         else:
-#             # Validate name
-#             name = input("Name (20 Character Limit): ")
-#             while len(name) > 20:
-#                 name = input("Name (20 Character Limit): ")
-#             if len(name) == 0:
-#                 return
-# 
-#             # Validate phone
-#             phone = input("Phone (XXX-XXX-XXXX): ")
-#             while len(phone) > 12:
-#                 phone = input("Phone (XXX-XXX-XXXX): ")
-#             if len(phone) == 0:
-#                 return
-# 
-#             # Validate password - also hides input
-#             password = getpass.getpass("Password (6 Character Limit): ")  # Hides input
-#             while len(password) > 6:
-#                 password = getpass.getpass("Password (6 Character Limit): ")
-#             if len(password) == 0:
-#                 return
-# 
-#             # Adds newly created account to members table
-#             cursor.execute("INSERT INTO members VALUES (?, ?, ?, ?);", [email, name, phone, password])
-#             break
-# 
-#     # Continue to main menu (No messages to see for a newly created account)
-#     main_menu(db_connection, cursor, email)
-#     #db_exit()
 
 
 def login(db_connection, cursor):
@@ -172,7 +116,7 @@ def login(db_connection, cursor):
         while True:
             email = input("Enter email or press enter to return: ").lower()
             if email == '':
-                #login_menu(db_connection, cursor) # THIS ISNT WORKING FOR SOME REASON
+                menus.login_menu(db_connection, cursor)
                 return
                 
             if email =='exit':

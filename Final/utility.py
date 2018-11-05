@@ -5,8 +5,8 @@
 #
 #
 import os
-import time 
-import datetime
+from time import sleep
+from datetime import datetime, timedelta
 import sys
 
 
@@ -28,30 +28,32 @@ def clear_screen():
 
 def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
-    print('\n\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
+    clear_screen()
+    print('\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
     print("    ###################")
     print("    ####           ####")
     print("    ##  SeeYouAgain  ##")
     print("    ####           ####")    
     print("    ###################\n")
     print('\n    . . . .... .... ..\n                ... . ..... .. .. ') 
-    
+    sleep(2)
     
     db_connection.commit()
     db_connection.close()
-# <<<<<<< HEAD
+
     clear_screen()
     quit()
-def message_member(db_connection, cursor,recipient,sender, message, rno):
+
+
+def message_member(db_connection, cursor, recipient, sender, message, rno):
+    new_message = (recipient, sender, message, rno)
     
-    seen = 'n'
-    new_message = (recipient,sender, message, rno,seen,)
-    
-    cursor.execute("INSERT INTO inbox VALUES(?,datetime('now'),?,?,?,?) ", new_message)
+    cursor.execute("INSERT INTO inbox VALUES(?, datetime('now'), ?, ?, ?, 'n');", new_message)
     print("\nMESSAGE SENT")
     db_connection.commit()
     
     return True
+
 
 def valid_user(member_to_book):
     valid_user = False
@@ -62,6 +64,7 @@ def valid_user(member_to_book):
         
     return valid_user
 
+
 def valid_lcode(lcode):
     valid = False
     location = (lcode,)
@@ -69,8 +72,3 @@ def valid_lcode(lcode):
     if cursor.fetchone():
         valid = True
     return valid
-# =======
-#     quit()
-    time.sleep(1.5) 
-    sys.exit()
-# >>>>>>> 97dc5eb45a155117967714b9e9d918abdde581a3

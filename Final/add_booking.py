@@ -1,6 +1,7 @@
 from utility import *
 import menus
 
+
 def add_booking(db_connection, cursor, member_email):
     
     # list all rides offered by the user then select a ride to book a member
