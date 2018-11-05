@@ -42,7 +42,7 @@ def post_ride_request(db_connection, cursor, member_email):
     date = input("  Date (YYYY-MM-DD): ")
     if len(date) == 0:
         return
-    while not validate_date(date):
+    while not will_validate_date(date):
         print("  Please enter a valid date.")
         date = input("  Date (YYYY-MM-DD): ")
         if len(date) == 0:
@@ -68,15 +68,13 @@ def post_ride_request(db_connection, cursor, member_email):
     # Validate pickup location
     pickup = input("  Pickup location: ").lower()
     while pickup not in location_codes:
-        if len(pickup) == 0:
-            return
+        print("Please enter a valid pickup location.")
         pickup = input("  Pickup location: ").lower()
 
     # Validate dropoff location (can't be the same as pickup)
     dropoff = input("  Dropoff location: ").lower()
-    while dropoff not in location_codes or dropoff == pickup:
-        if len(dropoff) == 0:
-            return
+    while dropoff not in location_codes:
+        print("Please enter a valid dropoff location.")
         dropoff = input("\n  Dropoff location: ").lower()
 
     # Validate amount (non-negative integer)
@@ -85,10 +83,13 @@ def post_ride_request(db_connection, cursor, member_email):
         try:
             amount = int(input("  Amount per seat: "))
         except:
-            pass
+            continue
 
+    # print(rid, member_email, date, pickup, dropoff, amount)
     # Insert ride request into database
     cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, member_email, date, pickup, dropoff, amount])
+    # cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);",
+    #                [16, 'jane_doe@abc.ca', '2018-11-07', 'sth1', 'cntr1', 10])
     db_connection.commit()
 
     print("\n. .. . .. Request successfully posted!.")
@@ -114,14 +115,14 @@ def deleteRequest(db_connection, row, displayedRequests):
 
         elif choice.upper() == 'N':
             print('***\n*** Not deleting request.\n***\n')
-            time.sleep(1)
+            sleep(1)
             return
 
         else:
             print("***\n*** Invalid menu option. (y/n)\n***")
 
     print("> Deleting request.. . .  . . ..")
-    time.sleep(1)
+    sleep(1)
 
     #cursor.execute = ("DELETE FROM requests WHERE rid = '{}'").format(request[0])
     cursor.execute("DELETE FROM requests WHERE rid ==?;",[request[0]] )
@@ -141,7 +142,7 @@ def searchRideRequests(db_connection, cursor, member_email):
     
     if len(result) == 0:
         print("***\n*** You have no requests\n***")
-        time.sleep(1)
+        sleep(1)
         return # goes back to searchandeleterequest menu 
 
     while len(result) != 0:
@@ -178,7 +179,7 @@ def searchRideRequests(db_connection, cursor, member_email):
 
             else: #invalid input
                 print("***\n*** Incorrect entry. Try again\n***")
-                time.sleep(1)
+                sleep(1)
                 return
 
     # all requests were printed.....
@@ -270,7 +271,7 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
         #print(result)
         if len(result) == 0:
             print("***\n*** There are no requests\n***")
-            time.sleep(1)
+            sleep(1)
             return # back to menu
 
         while len(result) != 0:
@@ -304,7 +305,7 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
 
                 else: #invalid input
                     print("***\n*** Incorrect entry. Try again\n***")
-                    time.sleep(1.3)
+                    sleep(1.3)
                     return
 
         # all requests were printed.....
@@ -344,7 +345,7 @@ def messageMember(db_connection, cursor, row, member_email, displayedResults):
 
     print(">Message [{}] sent to {}.. .. . ..").format(message, poster)
     database.commit()
-    time.sleep(1.4)
+    sleep(1.4)
     return
 
 ################################################################

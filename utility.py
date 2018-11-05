@@ -18,6 +18,14 @@ def validate_date(date):
     else:
         return False
 
+def will_validate_date(date):
+    try:
+        date = datetime.strptime(date, '%Y-%m-%d')
+        if date >= (datetime.now() - timedelta(days=1)):
+            return True
+    except:
+        return False
+
 
 def clear_screen():
     # Function to clear the screen - less clutter

@@ -132,7 +132,7 @@ def main_menu(db_connection, cursor, member_email):
         
         #6. Post Ride Request
         if choice == "6":
-            requests.post_ride_request(cursor, member_email)
+            requests.post_ride_request(db_connection, cursor, member_email)
             return
         
         #7. Inbox
@@ -267,18 +267,19 @@ def login(db_connection, cursor):
     truePassword = False
     
     while trueEmail == False: #loops until a proper email address is entered
-        email = input("  Email: ").upper()
+        email = input("  Email: ")
         
-        if email == "EXIT":
+        if email.upper() == "EXIT":
             db_exit(db_connection)
             
-        if email == "BACK" or email == "":
+        if email.upper() == "BACK" or email == "":
             #return #maybe wrong....... # GOES BACK TO THE MAIN AUTHENTICATION MENU  (before print statements)
             login_menu(db_connection, cursor)
             
         cursor.execute("SELECT email FROM members WHERE email=? COLLATE NOCASE;", [email])
-        emailList = cursor.fetchall()
-        if len(emailList)>0 and email != "email":
+        row = cursor.fetchone()
+        if len(row) == 1 and email != "email":
+            email = row[0]
             trueEmail = True
             
         if trueEmail == False:
@@ -334,7 +335,7 @@ def register(db_connection, cursor):
         elif len(email)==0:
             continue
             
-        cursor.execute("SELECT email FROM members WHERE email = \""+email +"\"") #check if the email is in the members table
+        cursor.execute("SELECT email FROM members WHERE email = ? COLLATE NOCASE;", [email]) #check if the email is in the members table
         allEmails = cursor.fetchall()
         
         if len(allEmails)==0:
@@ -386,10 +387,9 @@ def register(db_connection, cursor):
             continue
         else:
             truePWD = True
+
     cursor.execute("INSERT INTO members VALUES (?, ?, ?, ?);", [email, name, phone, password])
     db_connection.commit() # commit right now to ensure member can book/use their account
     print("***\n*** You're now successfully registered!\n***")
     time.sleep(1.5)
     main_menu(db_connection, cursor, email) # Continue to main menu (No messages to see for a newly created account)
-
-
