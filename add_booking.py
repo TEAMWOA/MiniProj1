@@ -87,8 +87,8 @@ def add_booking(db_connection, cursor, member_email):
     
     # if it is full, return a message asking to proceed
     if seats_available == 0:
-        proceed = ("\nThis ride is full! Proceed?\n(yes/no)").strip()
-        while proceed != 'no' or proceed!= 'yes':
+        proceed = input("\nThis ride is full! Proceed?\n(yes/no)").strip()
+        while proceed.lower not in ["no","yes"]:
             proceed= input("\nPlease enter yes or no: ").strip()        
         if proceed.lower() == 'no':
             add_booking(db_connection,cursor,member_email)
@@ -105,7 +105,7 @@ def add_booking(db_connection, cursor, member_email):
         #to check for a valid user
         member_to_book = input("\nEnter member's email to book: ").strip()
         cursor = db_connection.cursor()
-        while not valid_user(member_to_book, cursor):
+        while not valid_user(member_to_book,cursor):
             member_to_book = input("\nInvalid Email, Enter another email: ").strip()
         
         #Get how many seats to book for the member
@@ -127,12 +127,12 @@ def add_booking(db_connection, cursor, member_email):
         
         #recieve the cost per seat and make sure a digit is put in
         # then change it into a float before putting in db
-        
+        valid_cost = False
         while valid_cost == False:
             try:
                 cost_per_seat = input("\nEnter the cost per seat: ").strip()
                 float(cost_per_seat)
-                valid_cost == True
+                valid_cost = True
             except ValueError:
                 cost_per_seat = print("\nInvalid Price!! Numbers only")
         
@@ -151,7 +151,7 @@ def add_booking(db_connection, cursor, member_email):
         
         # GEt final prompt from user
         prompt = input("\nConfirm Booking? (yes/no):   ").strip()
-        while prompt != 'no' or prompt!= 'yes':
+        while prompt not in ["yes","no"]:
             prompt= input("\nPlease enter yes or no: ").strip()
         if prompt == "yes":
         # Insert the new bookings into the table
@@ -161,23 +161,24 @@ def add_booking(db_connection, cursor, member_email):
             # Then update the rides table and message the booked member
             updated_ride = (seats_left, rno,)
             cursor.execute("UPDATE rides SET seats = ? where rno = ?", updated_ride)
-            db_connection.commit()
             
-            
-            message = "You have been booked on ride" + rno + ".\n"
+
+            message = "You have been booked on ride" + str(rno) + ".\n"
             sender = member_email
             recipient = member_to_book
-            message_member(db_connection, recipient,sender,message,rno)
-            
+            message_member(db_connection,cursor, recipient,sender,message,rno)
+            db_connection.commit()
             # after booking, prompt to make another one
             prompt = input("\nBooking Confirmed. Would you like to make another one?\n(yes/no): ").strip()
             
-            while prompt != 'no' or prompt!= 'yes':
+            while prompt not in ["yes","no"]:
                 prompt= input("\nPlease enter yes or no: ").strip()            
             if prompt == "yes":
                 add_booking(db_connection, cursor, member_email)
             elif prompt == "no":
                 menus.main_menu(db_connection, cursor, member_email)
+            elif prompt == "exit":
+                menus.main_menu(db_connection,cursor,member_email)
         elif prompt == "no":
             add_booking(db_connection, cursor, member_email)
         
