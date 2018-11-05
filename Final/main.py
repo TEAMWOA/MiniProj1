@@ -1,6 +1,6 @@
 # Main Program 
 #
-#
+# 
 
 import sqlite3
 import sys
@@ -8,11 +8,8 @@ import time
 import os
 import datetime
 
-from authentication import *
-#from MENUS import *
-from utility import *
-from MainMenu import *
-
+import menus # all of the menus ; menus imports requests, rides, bookings
+from utility import * #various utility functions
 
 
 def main():
@@ -39,7 +36,7 @@ def main():
     db_connection.commit()
 
     # Start user at login menu
-    login_menu(db_connection, cursor)
+    menus.login_menu(db_connection, cursor)
     
     #commit and close database
     db_exit(db_connection)

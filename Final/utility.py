@@ -1,4 +1,5 @@
 # Utility functions for the program
+
 # (1) validate_date(date)
 # (2) clear_screen()
 # (3) db_exit()
@@ -28,7 +29,10 @@ def clear_screen():
 
 def db_exit(db_connection):
     # Commits to database, closes connection and clears screen prior to quitting
+    time.sleep(0.4)
+    clear_screen()
     print('\n\n\n   .. .. .... .... .. .\n.. ... .. \nQuitting Program ..... \n\n')
+    print('    . . .. ..... ...... Changes Saved\n')
     print("    ###################")
     print("    ####           ####")
     print("    ##  SeeYouAgain  ##")
@@ -39,6 +43,5 @@ def db_exit(db_connection):
     
     db_connection.commit()
     db_connection.close()
-#     quit()
-    time.sleep(1.5) 
+    time.sleep(0.5) 
     sys.exit()
