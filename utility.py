@@ -59,7 +59,7 @@ def message_member(db_connection, cursor, recipient, sender, message, rno):
     return True
 
 
-def valid_user(member_to_book):
+def valid_user(member_to_book,cursor):
     valid_user = False
     user = (member_to_book,)
     cursor.execute("SELECT name from members where email = ? ",user)
@@ -69,7 +69,7 @@ def valid_user(member_to_book):
     return valid_user
 
 
-def valid_lcode(lcode):
+def valid_lcode(lcode,cursor):
     valid = False
     location = (lcode,)
     cursor.execute("SELECT address from locations where lcode = ? ", location)
