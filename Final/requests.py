@@ -1,7 +1,15 @@
 # Ride Request Handling 
 #
+# 1. post_ride_request(cursor, member_email)
+# 2. deleteRequest(db_connection, row, displayedRequests)
+# 3. searchRideRequests(db_connection, cursor, member_email)
+# 4. searchAndDeleteRequest(db_connection, cursor, member_email)
+# 5. searchKeyWordRequest(db_connection, member_email, cursor)
+# 6. messageMember(db_connection, row, member_email, displayedResults)
 #
 #
+
+import datetime
 import menus
 from time import sleep
 from utility import *
@@ -16,11 +24,11 @@ def post_ride_request(db_connection, cursor, member_email):
     clear_screen()
 
     print("\n")
-    print("    ####################")
-    print("    ####            ####")
-    print("    ### POST REQUEST ###")
-    print("    ####            ####")
-    print("    ####################\n\n")
+    print("    ##########################")
+    print("    ####                  ####")
+    print("    ### Post Ride Requests ###")
+    print("    ####                  ####")    
+    print("    ##########################\n\n")
 
     # Generate request id
     try:
@@ -69,7 +77,7 @@ def post_ride_request(db_connection, cursor, member_email):
     while dropoff not in location_codes or dropoff == pickup:
         if len(dropoff) == 0:
             return
-        dropoff = input("  Dropoff location: ").lower()
+        dropoff = input("\n  Dropoff location: ").lower()
 
     # Validate amount (non-negative integer)
     amount = -1
@@ -83,7 +91,261 @@ def post_ride_request(db_connection, cursor, member_email):
     cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, member_email, date, pickup, dropoff, amount])
     db_connection.commit()
 
-    print("\nRequest successfully posted.")
-    sleep(2)
+    print("\n. .. . .. Request successfully posted!.")
+    sleep(1.5)
 
     menus.main_menu(db_connection, cursor, member_email)
+
+################################################################
+#
+# 2. Delete Ride Requests
+#
+def deleteRequest(db_connection, row, displayedRequests):
+    #deletes a row in the request table 
+
+    cursor = db_connection.cursor()
+    request = displayedRequests[row]
+
+    while(1):
+        print("\n> Confirm request deletion (y/n)")
+        choice = input()
+        if choice.upper() == 'Y':
+            break #continue with deletion
+
+        elif choice.upper() == 'N':
+            print('***\n*** Not deleting request.\n***\n')
+            time.sleep(1)
+            return
+
+        else:
+            print("***\n*** Invalid menu option. (y/n)\n***")
+
+    print("> Deleting request.. . .  . . ..")
+    time.sleep(1)
+
+    #cursor.execute = ("DELETE FROM requests WHERE rid = '{}'").format(request[0])
+    cursor.execute("DELETE FROM requests WHERE rid ==?;",[request[0]] )
+    db_connection.commit()
+    return
+    
+#########################################################   
+# 
+# 3. Search Ride Requests
+#
+def searchRideRequests(db_connection, cursor, member_email):
+
+    cursor.execute("SELECT * FROM requests WHERE email ==? COLLATE NOCASE;", [member_email])
+    result = cursor.fetchall()
+    #print(result)
+    
+    
+    if len(result) == 0:
+        print("***\n*** You have no requests\n***")
+        time.sleep(1)
+        return # goes back to searchandeleterequest menu 
+
+    while len(result) != 0:
+        #print out 5 results at a time
+        displayedRequests = [] #will hold the requests currently displayed on the screen
+
+        print("Your ride requests .... ")
+        for i in range(1,6):
+            if len(result) == 0:
+                break
+
+            request = result.pop()
+            displayedRequests.append(request)
+            #show 5 results
+            print(("\n  [{}]  rid: {}\n       Email: {}\n       RequestDate: {}\n       Pickup: {}\n       Dropoff: {}\n       Amount: {}\n").format(i, request[0], request[1], request[2], request[3], request[4], request[5]))
+        
+        #type more to see more results or enter request number to delete
+        if len(result) != 0:
+            print("< Type MORE to see more requests or select the index number to delete the request >")
+            choice = input()
+            if choice.upper() == 'EXIT': #IF the user wants to exit
+                db_exit(db_connection) #QUIT
+
+            elif choice.upper() == 'BACK':
+                return #return to main request screen
+
+            elif choice.upper() == 'MORE':
+                continue 
+
+            elif '1' <= choice <= '5':
+                #delete the request
+                deleteRequest(db_connection, int(choice) - 1, displayedRequests)
+                return #return to main request screen
+
+            else: #invalid input
+                print("***\n*** Incorrect entry. Try again\n***")
+                time.sleep(1)
+                return
+
+    # all requests were printed.....
+    print("\n< No more requests. Select the index number to delete the request >")
+    print("< Type EXIT to end the program or BACK/press ENTER to go back to the Search&DeleteRequest Menu >")
+    choice = input()
+    if choice.upper() == 'EXIT':  # IF the user wants to exit
+        db_exit(db_connection)
+
+    elif choice.upper() == 'BACK': #return to request selection screen
+        return
+
+    elif choice.upper() == "":
+        return 
+     
+    elif '1' <= choice <= str(len(displayedRequests)): #may not be 5 displayed requests
+        deleteRequest(db_connection, int(choice) - 1, displayedRequests)
+        return  # return to main request selection screen
+
+    return
+
+################################################################
+#    
+# 4. search and delete ride requests (menu)
+#
+
+def searchAndDeleteRequest(db_connection, cursor, member_email):    
+    while(1):
+        clear_screen()
+        print("\n")
+        print("    ############################")
+        print("    ####                    ####")
+        print("    ### Search&DeleteRequest ###")
+        print("    ####                    ####")    
+        print("    ############################\n\n")
+        print("< Type EXIT to end the program or BACK/press ENTER to go back to the Main Menu >\n")
+        print("   1. View/delete ride requests\n   2. Search for requests by lcode or city *and* message other member\n")
+        print
+        choice = input()
+
+        if choice.upper() == 'EXIT': #IF the user wants to exit
+            db_exit(db_connection)
+
+        elif choice.upper() == 'BACK': #return user to main menu
+            menus.main_menu(db_connection, cursor, member_email)
+        
+        elif choice == "":
+            menus.main_menu(db_connection, cursor, member_email)
+            
+        elif choice == '1':
+            searchRideRequests(db_connection, cursor, member_email)
+
+        elif choice == '2':
+            searchKeyWordRequest(db_connection, member_email, cursor)
+        
+#         elif choice == '3':
+#             messageMember(db_connection, member_email, cursor)
+
+        else:
+            print("***\n*** Invalid menu option. Try again\n***")
+            continue   
+
+
+################################################################
+#    
+# 5. searchKeyWordRequest(db_connection, member_email, cursor)
+#
+#    
+def searchKeyWordRequest(db_connection, member_email, cursor):
+    
+    print("< Enter a lcode or a city to see the ride requests >")
+    print("< Note: requests queried by lcode or city does not include your requests >")
+    choice = input()
+    
+    if choice.upper() == 'EXIT':  # exit
+        db_exit(db_connection)
+
+    elif choice.upper() == 'BACK': #return to request selection screen
+        return
+        
+    elif choice.upper() == "":
+        return 
+        
+    #QUERY
+    else:
+        cursor.execute("SELECT rid, email, rdate, l1.city, l2.city, amount FROM requests, locations l1, locations l2  WHERE ((l1.lcode LIKE ?) OR (l1.city LIKE ?)) AND l1.lcode = pickup AND l2.lcode = dropoff AND email <> ? COLLATE NOCASE;", [choice, choice, member_email])
+        #     cursor.execute("SELECT * FROM requests WHERE email ==? COLLATE NOCASE;", [member_email])
+        result = cursor.fetchall() 
+        #print(result)
+        if len(result) == 0:
+            print("***\n*** There are no requests\n***")
+            time.sleep(1)
+            return # back to menu
+
+        while len(result) != 0:
+            # print out 5 results at a time
+            displayedRequests = []  # will hold the requests currently displayed on the screen
+            for i in range(1, 6):
+                if len(result) == 0:
+                    break
+                    
+                request = result.pop()
+                displayedRequests.append(request)
+                #show 5 results 
+                print(("\n  [{}]  rid: {}\n       Email: {}\n       RequestDate: {}\n       Pickup: {}\n       Dropoff: {}\n       Amount: {}\n").format(i, request[0], request[1], request[2], request[3], request[4], request[5]))
+            #type more to see more results or enter request number to delete
+            if len(result) != 0:
+                print("< Type MORE to see more requests or select the index number to delete the request >")
+                choice = input()
+                if choice.upper() == 'EXIT': #IF the user wants to exit
+                    db_exit(db_connection) #QUIT
+
+                elif choice.upper() == 'BACK':
+                    return #return to main request screen
+
+                elif choice.upper() == 'MORE':
+                    continue 
+
+                elif '1' <= choice <= '5':
+                    #MESSAGE MEMBER
+                    messageMember(db_connection, cursor, int(choice) - 1, member_email, displayedRequests)
+                    return #return to main request screen
+
+                else: #invalid input
+                    print("***\n*** Incorrect entry. Try again\n***")
+                    time.sleep(1.3)
+                    return
+
+        # all requests were printed.....
+        print("\n< No more requests. Select the index number to send a message to the posting member >")
+        print("< Type EXIT to end the program or BACK/press ENTER to go back to the Search&DeleteRequest Menu >")
+        choice = input()
+        if choice.upper() == 'EXIT':  # IF the user wants to exit
+            db_exit(db_connection)
+
+        elif choice.upper() == 'BACK': #return to request selection screen
+            return
+
+        elif choice.upper() == "":
+            return 
+ 
+        elif '1' <= choice <= str(len(displayedRequests)): #may not be 5 displayed requests
+            #MESSAGE MEMBER
+            messageMember(db_connection, cursor, int(choice) - 1, member_email, displayedRequests)
+            return  # return to main request selection screen
+
+        return
+ 
+ ################################################################
+#    
+# 6. message member (db_connection, member_email, cursor)
+#
+#    
+
+def messageMember(db_connection, cursor, row, member_email, displayedResults):
+
+    rno = displayedResults[row][0]
+    poster = displayedResults[row][1]
+    
+    message = input(("\n>Type a message to send to {} :\n").format(poster))
+    # insert inputted message into the table
+    cursor.execute(("INSERT INTO inbox VALUES (?, datetime('now'), ?, ?, ?, 'n');"),[poster, member_email, message, rno])
+
+    print(">Message [{}] sent to {}.. .. . ..").format(message, poster)
+    database.commit()
+    time.sleep(1.4)
+    return
+
+################################################################
+#    

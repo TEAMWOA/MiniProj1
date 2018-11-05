@@ -11,13 +11,11 @@ import sys
 
 
 def validate_date(date):
-    # Checks whether the date is valid according to the format YYYY-MM-DD
-    # Returns True if valid, False otherwise
-    try:
-        date = datetime.strptime(date, '%Y-%m-%d')
-        if date >= (datetime.now() - timedelta(days=1)):
-            return True
-    except:
+    now = datetime.datetime.now()
+    todaysDATE = now.strftime("%Y-%m-%d")
+    if date >= todaysDATE:
+        return True
+    else:
         return False
 
 
@@ -40,7 +38,6 @@ def db_exit(db_connection):
     
     db_connection.commit()
     db_connection.close()
-
     clear_screen()
     quit()
 

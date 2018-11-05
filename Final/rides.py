@@ -363,7 +363,7 @@ def offer_ride(db_connection, cursor, member_email):
             cursor.execute("INSERT INTO enroute VALUES (?, ?);", [rno, item[0]])
     db_connection.commit()
 
-    print("\nRide successfully posted.")
-    sleep(2)
+    print("\n   . . .. . Ride successfully posted!")
+    sleep(1.5)
 
     menus.main_menu(db_connection, cursor, member_email)

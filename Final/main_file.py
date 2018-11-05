@@ -27,7 +27,7 @@ def main():
     print("############")
     print("############ #############")
     print("############ ############# ############")
-    time.sleep(2.5)
+    time.sleep(1.5)
     
     path = "./{}".format(sys.argv[1])
     db_connection = sqlite3.connect(path)
@@ -37,13 +37,10 @@ def main():
     db_connection.commit()
 
     # Start user at login menu
-    login_menu(db_connection, cursor)
+    menus.login_menu(db_connection, cursor)
     
-    # commit and close database
-    db_connection.commit()
-    db_connection.close()
-    # exit with print messages
-    db_exit()
+    # commit and close database; exit with print messages
+    db_exit(db_connection)
 
 
 if __name__ == "__main__":
