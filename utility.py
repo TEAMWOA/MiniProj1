@@ -25,7 +25,7 @@ def will_validate_date(date):
             return True
     except:
         return False
-    
+
 def clear_screen():
     # Function to clear the screen - less clutter
     os.system("clear")
