@@ -91,8 +91,6 @@ def post_ride_request(db_connection, cursor, member_email):
     # print(rid, member_email, date, pickup, dropoff, amount)
     # Insert ride request into database
     cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);", [rid, member_email, date, pickup, dropoff, amount])
-    # cursor.execute("INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?);",
-    #                [16, 'jane_doe@abc.ca', '2018-11-07', 'sth1', 'cntr1', 10])
     db_connection.commit()
 
     print("\n. .. . .. Request successfully posted!.")
@@ -145,7 +143,7 @@ def searchRideRequests(db_connection, cursor, member_email):
     
     if len(result) == 0:
         print("***\n*** You have no requests\n***")
-        sleep(1)
+        sleep(2)
         return # goes back to searchandeleterequest menu 
 
     while len(result) != 0:
@@ -253,7 +251,7 @@ def searchAndDeleteRequest(db_connection, cursor, member_email):
 #    
 def searchKeyWordRequest(db_connection, member_email, cursor):
     
-    print("< Enter a lcode or a city to see the ride requests >")
+    print("< Enter a pickup lcode or a city to see the ride requests >")
     print("< Note: requests queried by lcode or city does not include your requests >")
     choice = input()
     
@@ -339,15 +337,17 @@ def searchKeyWordRequest(db_connection, member_email, cursor):
 
 def messageMember(db_connection, cursor, row, member_email, displayedResults):
 
-    rno = displayedResults[row][0]
+    rid = displayedResults[row][0]
     poster = displayedResults[row][1]
     
     message = input(("\n>Type a message to send to {} :\n").format(poster))
     # insert inputted message into the table
-    cursor.execute(("INSERT INTO inbox VALUES (?, datetime('now'), ?, ?, ?, 'n');"),[poster, member_email, message, rno])
+    cursor.execute("INSERT INTO inbox VALUES (?, datetime('now'), ?, ?, ?, 'n');", [poster, member_email, message, rid])
+    # cursor.execute("INSERT INTO inbox VALUES ('jane_doe@abc.ca', datetime('now'), 'test@test.test', 'test', 10, 'n');")
 
-    print(">Message [{}] sent to {}.. .. . ..").format(message, poster)
-    database.commit()
+
+    print(">Message [{}] sent to {}.. .. . ..".format(message, poster))
+    db_connection.commit()
     sleep(1.4)
     return
 

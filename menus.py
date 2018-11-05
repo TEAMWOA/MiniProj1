@@ -88,7 +88,7 @@ def main_menu(db_connection, cursor, member_email):
         print("   2. Offer Ride")
         print("   3. Book Member on Ride")
         print("   4. Cancel Ride Booking")
-        print("   5. Search/Delete Ride Request *also message posting member")
+        print("   5. Search/Delete Ride Request")
         print("   6. Post Ride Request")
         print("   7. Inbox")
         print("   8. Logout")
@@ -205,14 +205,14 @@ def inbox(db_connection, cursor, member_email):
             print("Unread Messages:\n")
             if len(unread_messages) > 0:
                 for message in unread_messages:
-                    print("RNO #{}...".format(message[3]))
+                    print("Ride #{}".format(message[3]))
                     print("From: {:<15}      Timestamp: {:>19}".format(message[1], message[0]))
                     print(message[2])
                     print()
-                    #input("< Type EXIT to end the program or BACK/press ENTER to go back to the Main Menu >\n")
-                    # Uncomment when done testing
-                    # cursor.execute("UPDATE inbox SET seen='y' WHERE email=?;", [member_email])
-                    # db_connection.commit()
+                input("< Type EXIT to end the program or BACK/press ENTER to go back to the Main Menu >\n")
+
+                cursor.execute("UPDATE inbox SET seen='y' WHERE email=?;", [member_email])
+                db_connection.commit()
             else:
                 print("\n***\n*** You have no unread messages\n***")
                 input("\n< Press ENTER to go back to your inbox. >")
